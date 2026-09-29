@@ -1,0 +1,3 @@
+             PGM /*STMMDELETE*/
+             CALL       PGM(MCPRD/CLMMDELETE)
+EOJ:         ENDPGM

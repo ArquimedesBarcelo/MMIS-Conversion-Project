@@ -1,0 +1,20 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&JCWVALUE) TYPE(*CHAR) LEN(1)
+             CHGCURLIB MCPRD1
+   /********************************************************/
+   /*** PURGE AND REBUILD THE RAW BATCH ERR AND RPT FILES***/
+   /********************************************************/
+   CALL MCDLT PARM('RAWBTRPT')
+   CALL CCRTFILE PARM('*CURLIB' 'RAWBTRPT' '133' '1000' '1000' '30' &S)
+   CALL MCDLT PARM('RAWBTERR')
+   CALL CCRTFILE PARM('*CURLIB' 'RAWBTERR' '133' '1000' '1000' '30' &S)
+   /*** OVERRIDE TO DESIRED PRINTER FOR CORP CODE ***/
+   /*** ADD, MODIFIES, DELETES REPORT             ***/
+   OVRPRTF    FILE(MCPRT) TOFILE(MCPRT22)
+   /********************************************************/
+   /*** WHAT THE HECK, CALL THE PROGRAM...               ***/
+   /********************************************************/
+             CHGDTAARA  DTAARA(*LDA (285 1)) VALUE('N')
+             CALL       PGM(TAKRUPDT)
+             ENDPGM

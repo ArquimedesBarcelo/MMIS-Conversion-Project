@@ -1,0 +1,15 @@
+//BCHJOB  JOB(BMANTEST) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *SECLVL) LOGCLPGM(*YES)
+             CLRPFM     FILE(MANWKFL1)
+             CLRPFM     FILE(MANAKFL1)
+             CLRPFM     FILE(MANRPTFL)
+             CLRPFM     FILE(PAYRPTFL)
+             CLRPFM     FILE(INVRPTFL)
+             CLRPFM     FILE(STRRPTFL)
+CALL       PGM(MCTST/TMANCRTEN)
+RLSE
+CATH
+N
+
+             CALL       PGM(BXMANCL)
+//ENDBCHJOB

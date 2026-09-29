@@ -1,0 +1,14 @@
+//BCHJOB  JOB(BXGETTRM) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/****************************************************************/
+/* THIS JOB EXTRACTS THE PAYMENT TERMS FROM DVALIDDATA TO A     */
+/* FILE.  THIS FILE CAN BE USED AS INPUT TO "TLOADVAL".         */
+/****************************************************************/
+             CALL       MCDLT    PARM('TERMFILE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'TERMFILE' +
+                          '080' '100' '100' '10')
+             OVRDBF     FILE(TERMFILE)    TOFILE(*CURLIB/TERMFILE)
+             CALL       PGM(TGETTERM)
+             OVRDBF     FILE(MCFPCSEECC) TOFILE(*CURLIB/TERMFILE)
+             CALL       PGM(TLOADVAL)
+//ENDBCHJOB

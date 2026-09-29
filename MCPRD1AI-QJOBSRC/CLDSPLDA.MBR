@@ -1,0 +1,3 @@
+             PGM /*CLDSPLDA*/
+             DSPDTAARA  DTAARA(*LDA) OUTPUT(*)
+ EOJ:        ENDPGM

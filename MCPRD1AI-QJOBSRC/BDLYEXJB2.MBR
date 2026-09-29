@@ -1,0 +1,34 @@
+             PGM        /*BDLYEXEC*/
+             DCL        VAR(&ROUTE)    TYPE(*CHAR) LEN(80)
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(112)
+             CALL       PGM(MCPRD/MCXADDLIBL)
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+CMDCALL:
+             CHGVAR     VAR(&ROUTE) VALUE('JULIAN BARNES  119 099MCMGR   +
+                          MCMGR   MCPRD1  TTTT  +
+                          01                          ')
+             CHGVAR     VAR(&DATALINE) VALUE(' X  2119   160   990   +
+                          200   320   340   330   410   420   430   ')
+        /*   CHGVAR     VAR(&DATALINE) VALUE('X   2')    */
+             CALL       TDLYEXEC PARM(&ROUTE &DATALINE)
+
+
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)
+             CLOF       OPNID(MCFLCS1401)
+             CLOF       OPNID(MCFLCS3101)
+             CLOF       OPNID(MCFLCS3603)
+ENDPGM

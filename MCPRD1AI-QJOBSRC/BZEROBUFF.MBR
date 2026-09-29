@@ -1,0 +1,12 @@
+             PGM
+/*#################################################################*/
+/*## This if for plant startup on as/400 to check for fields     ##*/
+/*## in the stores data files that are defined numeric but have  ##*/
+/*## nonnumeric data.  All nonnumerics are replaced with zero    ##*/
+/*#################################################################*/
+/* 07MAY93 CHANGED AKRON4 TO AKRON60.   ---DAVE PLUM               */
+             CALL       PGM(TZEROBUFF)  PARM('U')
+             DSPJOBLOG OUTPUT(*PRINT)
+             SNDNETSPLF FILE(MCPRT) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST)
+             ENDPGM

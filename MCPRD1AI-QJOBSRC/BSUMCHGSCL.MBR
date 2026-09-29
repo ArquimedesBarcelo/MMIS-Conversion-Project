@@ -1,0 +1,8 @@
+/***********************************************************/
+/**  THIS IS A CL PROGRAM TO DO A STRDBRDR FOR BSUMCHGSX  **/
+/**  SO IT CAN BE EXECUTED VIA SLEEPER                    **/
+/***********************************************************/
+PGM
+             STRDBRDR   FILE(MCPRD1/QJOBSRC) MBR(BSUMCHGSX) +
+                          RDR(BSUMCHGSX)
+ENDPGM

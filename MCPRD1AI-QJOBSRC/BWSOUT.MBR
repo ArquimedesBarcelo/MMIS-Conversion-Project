@@ -1,0 +1,23 @@
+             PGM        /*BWSOUT*/
+             DCL        VAR(&ROUTE)    TYPE(*CHAR) LEN(80)
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(112)
+CSISOVR:
+             OVRDBF     FILE(MCFLCS1501) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS0301) SHARE(*YES)
+CSISOPN:
+             OPNDBF     FILE(MCFLCS1501) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS0301) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+CMDCALL:
+             CHGVAR     VAR(&ROUTE) VALUE('JEFF BUNGO     +
+                          9961039MCMGR   MCMGR   MCPRD   00    01    -
+                      ')
+             CHGVAR VAR(&DATALINE)  VALUE('               +
+                                                                     -
+                      ')
+             CALL       TWSOUTP PARM(&ROUTE &DATALINE)
+CSISCLS:
+             CLOF       OPNID(MCFLCS1501)
+             CLOF       OPNID(MCFLCS0301)
+ENDPGM

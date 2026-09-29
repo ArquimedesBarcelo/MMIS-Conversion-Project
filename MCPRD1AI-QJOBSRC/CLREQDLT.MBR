@@ -1,0 +1,4 @@
+             PGM /*CLREQDLT*/
+             SBMJOB     CMD(CALL PGM(*LIBL/BREQDLT)) JOB(BREQDLT) +
+                          JOBD(*LIBL/MCMGR)
+EOJ:         ENDPGM

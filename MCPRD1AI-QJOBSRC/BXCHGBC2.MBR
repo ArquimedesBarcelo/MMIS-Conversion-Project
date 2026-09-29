@@ -1,0 +1,27 @@
+//BCHJOB  JOB(BXCHGBC2) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##             C S A S  JOB 'BXCHGBC2'     (SR23)              ##*/
+/*## DETAIL OF CHARGES BY BUSINESS CENTER II REPORT.  (THIS IS A ##*/
+/*## TRSCREN2 TYPE REPORT, BUT IT DOES NOT HAVE ITS OWN SCREEN,  ##*/
+/*## NOR IS IT DEFINED IN DRPTDEF, ETC.)                         ##*/
+/*#################################################################*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+             CALL       PGM(TCHBYBC2)
+CSAS USER      DDDD010UUUUUUUUAAAAAAAAGGGGGGGGTTTTX 01
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

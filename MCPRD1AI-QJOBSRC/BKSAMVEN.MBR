@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BKSAMVEN) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      C S I S  JOB  'BKSAMVEN                                 ##*/
+/*## THIS IS THE JOB TO AUTOMATICALLY UPDATE THE MCFPCSVEND FILE  ##*/
+/*## VIA SLEEPER.                                                 ##*/
+/*##################################################################*/
+             CALL       PGM(FOTKSAMVEN)
+//ENDBCHJOB

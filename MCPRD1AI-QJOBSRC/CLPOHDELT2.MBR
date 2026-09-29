@@ -1,0 +1,4 @@
+             PGM /*CLPOHDELT2*/
+             SBMJOB     CMD(CALL PGM(*LIBL/BPOHDELT2)) JOB(BPOHDELT2) +
+                          JOBD(*LIBL/MCMGR)
+EOJ:         ENDPGM

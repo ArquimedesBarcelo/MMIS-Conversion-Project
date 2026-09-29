@@ -1,0 +1,3 @@
+//BCHJOB  JOB(BRLMDTOP) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             CALL       PGM(TLABELS)

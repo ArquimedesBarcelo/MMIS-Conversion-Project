@@ -1,0 +1,3 @@
+             PGM /*STAUTOR20*/
+             CALL       PGM(MCPRD/TAUTOR20)
+EOJ:         ENDPGM

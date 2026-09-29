@@ -1,0 +1,4 @@
+             PGM /*BCKDREQQ*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT83)
+             CALL       PGM(MCPRD/TCKDREQQ)
+EOJ:         ENDPGM

@@ -1,0 +1,24 @@
+             PGM        PARM(&PARM) /*STLBRFILE*/
+   DCL &PARM *CHAR 26
+   DCL &PARMX *CHAR 30
+   CALL       MCDLT PARM('LBRFILE')
+             CRTPF      FILE(LBRFILE) RCDLEN(53) SIZE(1000 1000 1) +
+                          AUT(*ALL)
+             OVRPRTF    FILE(MCPRT) TOFILE(QPRINT) OUTQ(QPRINT) +
+                          HOLD(*YES)
+
+             IF         COND(%SST(&PARM 1 2) *GE '40') THEN(CHGVAR +
+                          VAR(%SST(&PARMX 1 2)) VALUE('19'))
+             ELSE       CMD(CHGVAR VAR(%SST(&PARMX 1 2)) VALUE('20'))
+
+    CHGVAR  %SST(&PARMX 3  10)  %SST(&PARM 1 10)
+
+             IF         COND(%SST(&PARM 11 2) *GE '40') THEN(CHGVAR +
+                          VAR(%SST(&PARMX 13 2)) VALUE('19'))
+             ELSE       CMD(CHGVAR VAR(%SST(&PARMX 13 2)) VALUE('20'))
+
+    CHGVAR  %SST(&PARMX 15 10)  %SST(&PARM 11 16)
+
+             CALL       PGM(TLBRFILE) +
+                          PARM(&PARMX)
+   ENDPGM

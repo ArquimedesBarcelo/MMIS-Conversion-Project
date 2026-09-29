@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BSWCLNUP) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*## C S I S  JOB  'BSWCLNUP'                                     ##*/
+/*##   THIS JOB RUNS THE PROGRAM REMOVE OLD STOREROOM WORKSHEET   ##*/
+/*##   FILES FROM SWDATAFL.                                       ##*/
+/*##################################################################*/
+             CALL       PGM(TSWCLNUP)
+//ENDBCHJOB

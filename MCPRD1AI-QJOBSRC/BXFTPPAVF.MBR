@@ -1,0 +1,7 @@
+/***********************************************************/
+/**  SUBMIT JOB TO EXECUTE CL PROGRAM CLFTPPAVF.          **/
+/***********************************************************/
+PGM
+             SBMJOB     JOB(FTPPAVF) JOBD(MCMGR) USER(*JOBD) +
+                          RQSDTA('CALL MCPRD0/CLFTPPAVF')
+ENDPGM

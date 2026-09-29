@@ -1,0 +1,46 @@
+PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+
+/*##################################################################*/
+/*##      C S I S  JOB  'BPOHDELT'                                ##*/
+/*## THIS JOB PURGES PO HISTORY INFORMATION FROM THE HISTORY DATA ##*/
+/*## BASE 'STHIST'.  ALL PURCHASE ORDER INFORMATION IS WRITTEN    ##*/
+/*## TO A FLAT FILE 'POHIST01'.  ONCE THIS JOB ENDS THIS FILE     ##*/
+/*## 'POHIST01' SHOULD BE BACKED UP TO TAPE AND PURGED FROM THE   ##*/
+/*## SYSTEM SINCE IT TAKES A LARGE AMOUNT OF DISK SPACE.          ##*/
+/*## CAUTION MAKE SURE YOU HAVE A GOOD BACKUP OF 'POHIST01'       ##*/
+/*## BEFORE PURGING IT!!!!!!!                                     ##*/
+/*##################################################################*/
+   CALL FOTPOHDELT
+   CALL CCRTFILE PARM('*CURLIB' 'PODELTH' '14' '1000' '1000' '30' &S)
+/*********************************************************************/
+/*** CREATE THE FLAT FILE "POHIST01".  IF IT ALREADY EXIST ISSUE   ***/
+/*** A MESSAGE AND GO TO THE END OF JOB.                           ***/
+/*********************************************************************/
+             CRTPF      FILE(POHIST01) RCDLEN(520) TEXT('PO Hist. +
+                          data. Must backup to tape before +
+                          delete!!') SIZE(100000 10000 30)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+             SNDUSRMSG  MSG('The PO history file "POHIST01" still +
+                          exists. You must make sure this file is +
+                          backed up to tape then purged.  Do not +
+                          purge this file until you are positive +
+                          that a successfull tape backup was made.  +
+                          Once "POHIST01" is backed up and purged +
+                          you should restart this program.  Any +
+                          questions contact Akron CSIS/MMIS +
+                          programming staff.  Enter ''C'' to cancel +
+                          this job.') TOMSGQ(*SYSOPR)
+             GOTO EOJ
+             ENDDO
+/*********************************************************************/
+/*** RUN TPOHDELT TO DO THE DELETE.  THE ONLY PARAMETER IS THE     ***/
+/*** MAXIMUM NUMBER OF PURCHASE ORDERS TO DELETE DURING A SINGLE   ***/
+/*** RUN.  IT IS A 5 DIGIT NUMBER.                                 ***/
+/*********************************************************************/
+             CALL       PGM(TPOHDELT) PARM('01000')
+/*********************************************************************/
+/*** CALL FCTPOHDELT TO CLOSE ALL THE FILES OPENED BY FOT7PODELT   ***/
+/*********************************************************************/
+         CALL FCTPOHDELT
+ EOJ:   ENDPGM

@@ -1,0 +1,53 @@
+             PGM        /* CREATE MACOS QUERY REPORTS */
+
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+ START:
+
+ /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Frt Charges (MACOS): +
+                          ' *CAT &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(68 195) LPI(8) +
+                          CPI(15) OVRFLW(60) OUTQ(PD01) SAVE(*YES) +
+                          USRDTA(MACOS)
+             MONMSG     MSGID(CPF0000)
+
+ /*  DELETE THE DATASETS WHICH THE QUERY PROGRAMS WILL CREATE */
+             CALL       PGM(MCDLT) PARM('MACOSFRT')
+             CALL       PGM(MCDLT) PARM('MACOSFRT2')
+             CALL       PGM(MCDLT) PARM('MACOSFRT3')
+             CALL       PGM(MCDLT) PARM('MACOSFRT4')
+             CALL       PGM(MCDLT) PARM('MACOSFRT5')
+             CALL       PGM(MCDLT) PARM('MACOSFRT6')
+             CALL       PGM(MCDLT) PARM('MACOSFRT8')
+
+ /*  RUN THE QUERY PROGRAMS                                        */
+             RUNQRY     QRY(MCPRD/MACOSFQ01)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ01X)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ02)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ03)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ04)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ05)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ06P)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ06N)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ07) /* CREATE DETAIL REPORT */
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ08)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(MCPRD/MACOSFQ09) /* CREATE SUMMARY REPORT */
+             MONMSG     MSGID(CPF0000)
+
+ END:
+             ENDPGM

@@ -1,0 +1,44 @@
+             PGM /*R3QUERIES*/
+             /* RUN THE QUERY PROGRAMS NECESSARY TO CREATE FILES             */
+             /*  1) R3MSTORER3 - MATERIAL MASTER DATA INCLUDING DESCRIPTIONS */
+             /*  2) R3DMANPART - MANUFACTURER / MANUFACTURER PART NUMBER DATA*/
+             /*  3) R3MANUFAC2 - MANUFACTURER NAMES                          */
+             /*                                                              */
+             /*  THESE FILES ARE COPIED TO THE CORPORATE MAINFRAME USING FTP */
+             /*  INTO DATASETS:                                              */
+             /*  1) A334884.MATLMSTR.P211                                    */
+             /*  2) A334884.MFRDATA.P211                                     */
+             /*  3) A334884.MFRNAMES.P211                                    */
+             /*                                                              */
+             RUNQRY     QRY(R3MSTORER2)
+             RUNQRY     QRY(R3USAGE)
+             RUNQRY     QRY(CCDESC09)
+             RUNQRY     QRY(CCDESC10)
+             RUNQRY     QRY(CCDESC11)
+             RUNQRY     QRY(CCDESC12)
+             RUNQRY     QRY(CCDESC13)
+             RUNQRY     QRY(CCDESC14)
+             RUNQRY     QRY(CCDESC15)
+             RUNQRY     QRY(CCDESC16)
+             RUNQRY     QRY(CCDESC17)
+             RUNQRY     QRY(CCDESC18)
+             RUNQRY     QRY(CCDESC19)
+             RUNQRY     QRY(CCDESC20)
+             RUNQRY     QRY(CCDESC21)
+             RUNQRY     QRY(CCDESC22)
+             RUNQRY     QRY(CCDESC23)
+             RUNQRY     QRY(CCDESC24)
+             RUNQRY     QRY(CCDESC25)
+             RUNQRY     QRY(CCDESC26)
+             RUNQRY     QRY(CCDESC27)
+             RUNQRY     QRY(CCDESC28)
+             RUNQRY     QRY(CCDESC29)
+             RUNQRY     QRY(CCDESC30)
+             RUNQRY     QRY(CCDESC31)
+             RUNQRY     QRY(CCDESC32)
+             RUNQRY     QRY(CCDESC99)
+             RUNQRY     QRY(R3MSTORER3)
+             RUNQRY     QRY(R3DMANPART)
+             RUNQRY     QRY(R3MANUFACT)
+             RUNQRY     QRY(R3MANUFAC2)
+             ENDPGM

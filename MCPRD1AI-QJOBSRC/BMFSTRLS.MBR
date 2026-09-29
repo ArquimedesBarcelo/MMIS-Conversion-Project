@@ -1,0 +1,49 @@
+//BCHJOB  JOB(BMFSTRLS) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##           C S A S   JOB 'BMFSTRLS'                           ##*/
+/*## THIS JOB PROCESSES THE STORES MANIFEST TRANSACTIONS IN THE   ##*/
+/*## 'DSTACT' FILES.  THIS JOB IS LAUNCHED BY 'BXDSTACT' WHENEVER ##*/
+/*## AN 'AP5' IS DONE OFF OF THE ACCOUNTS PAYABLE MENU.           ##*/
+/*##################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CMDCALL:
+/*#################################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             OVRPRTF    FILE(MCPRTA) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TMFSTRLS)
+             CALL       PGM(TCHKABRT)
+             CALL       PGM(MCDLT) PARM('STACTIVE')
+             CALL       PGM(TCALCAVG)
+             CALL       PGM(TMATLVAR)
+/************CALL       PGM(TINVCLAS) ****************/
+CALL PGM(TCSASTRN)
+CSAS ACCOUNTANTACCT097BMFSTRLSMCPRD1  MCPRD1  78  X 01
+04FRT INV                     ALL             DALL
+ALL                                                             Z
+ALL                             ALL         ALL                    f3-END PROGRA
+/*************************************************************************/
+/***** OLD PARMS FOR TCSASTRN - REPLACED 29AUG1995 (FOR I.01) ************/
+/*04FRT INV                     ALL             DALL                     */
+/*ALL                             ALL                             ALL    */
+/*ALL                                                                    */
+/*************************************************************************/
+             CALL       PGM(MCDLT) PARM('CLASFILE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CLASFILE' +
+                          '092' '0500' '0500' '09')
+             CALL       PGM(TDRCHGIV)
+             CALL       PGM(TMOVERPT)
+N
+/*#################################################################*/
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+//ENDBCHJOB

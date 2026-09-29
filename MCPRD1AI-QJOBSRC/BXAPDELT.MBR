@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BAPODELT) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      C S I S  JOB  'BAPODELT'    (PAD)                       ##*/
+/*## THIS IS THE AUTOMATIC PO DELETE JOB THAT DELETES COMPLETED   ##*/
+/*## PURCHASE ORDERS OLDER THAN A CERTAIN TIME FRAME (EX. 2 MONTHS##*/
+/*##################################################################*/
+             CALL       PGM(FOTAPODELT)
+//ENDBCHJOB

@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BDTLCHGS) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *SECLVL) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##           C S A S  JOB 'BDTLCHGS'    FOR TESTING ONLY        ##*/
+/*## THIS JOB CREATES A STORES DETAIL  REPORT FOR CSAS.           ##*/
+/*##################################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT25)
+             CALL       PGM(MCTST/TDTLCHGS)
+//ENDBCHJOB

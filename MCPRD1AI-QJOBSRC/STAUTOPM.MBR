@@ -1,0 +1,4 @@
+             PGM /*STAUTOPM*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT39)
+             CALL       PGM(MCPRD0/TPMSCHED)
+EOJ:         ENDPGM

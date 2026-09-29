@@ -1,0 +1,16 @@
+//BCHJOB  JOB(BXGETFOB) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/****************************************************************/
+/* THIS JOB EXTRACTS THE FOB CODES FROM MPLTINFO AND LOADS THEM */
+/* INTO A FILE CALLED "FOBFILE".  IT THEN CALLS "TLOADVAL" TO   */
+/* LOAD THE FOB DATA INTO THE DVALIDDATA FOR USE BY "CGENHELP". */
+/*    *** CALL CL PROGRAM "CLGETFOB" TO START THIS JOB ***      */
+/****************************************************************/
+             CALL       MCDLT    PARM('FOBFILE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'FOBFILE' +
+                          '080' '100' '100' '10')
+             OVRDBF     FILE(FOBFILE)    TOFILE(*CURLIB/FOBFILE)
+             CALL       PGM(TGETFOB)
+             OVRDBF     FILE(MCFPCSEECC) TOFILE(*CURLIB/FOBFILE)
+             CALL       PGM(TLOADVAL)
+//ENDBCHJOB

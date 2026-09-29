@@ -1,0 +1,7 @@
+             PGM        /* Clears MEMPL Approver dollar amounts*/
+             SNDMSG     MSG('Clear of Approver Amounts in MEMPL +
+                          has begun') TOUSR(*SYSOPR)
+             CALL       PGM(MCPRD/TCLRMEMP)
+             SNDMSG     MSG('Clear of Approver Amounts in MEMPL +
+                          has completed') TOUSR(*SYSOPR)
+             ENDPGM

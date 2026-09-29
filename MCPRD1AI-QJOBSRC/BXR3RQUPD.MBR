@@ -1,0 +1,121 @@
+   PGM
+   /**************************************************************/
+   /*** BXR3RQUPD:  THIS JOB PROCESS THE FILE SENT FROM VITRIA ***/
+   /*** CONTAINING CSIS/MMIS REQ # AND CORRESPONDING PO        ***/
+   /*** NUMBER IN SAP.                                         ***/
+   /**************************************************************/
+
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+
+             DCL        VAR(&RECORDS) TYPE(*DEC) LEN(10 0)
+
+             CHGCURLIB  CURLIB(MCPRD)
+
+   /*********************************************************************/
+   /*** RETRIEVE NUMBER OF RECORDS IN FILE.  IF ZERO THEN DATA HAS    ***/
+   /*** BEEN PROCESSED ALREADY BY A PREVIOUS JOB.  SIMPLY END THE JOB ***/
+   /*********************************************************************/
+              RTVMBRD    FILE(*CURLIB/MCFPCSSPRQ) MBR(MCFPCSSPRQ) +
+                           NBRCURRCD(&RECORDS)
+              IF COND(&RECORDS *EQ 0) THEN(DO)
+                 GOTO FINI
+              ENDDO
+
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE R3RQFILE MEMBERS   ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+
+             CPYF       FROMFILE(*CURLIB/MCFPCSSPRQ) +
+                         TOFILE(*CURLIB/R3RQFILE) +
+                            FROMMBR(MCFPCSSPRQ) TOMBR(R3RQFILE) +
+                            MBROPT(*REPLACE) FMTOPT(*NOCHK)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL8) TOMBR(R3RQFIL9) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL7) TOMBR(R3RQFIL8) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL6) TOMBR(R3RQFIL7) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL5) TOMBR(R3RQFIL6) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL4) TOMBR(R3RQFIL5) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL3) TOMBR(R3RQFIL4) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL2) TOMBR(R3RQFIL3) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFIL1) TOMBR(R3RQFIL2) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/R3RQFILE) +
+                          TOFILE(*CURLIB/R3RQFILE) +
+                          FROMMBR(R3RQFILE) TOMBR(R3RQFIL1) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG MSGID(CPF0000)
+             CLRPFM     FILE(*CURLIB/R3RQFILE) MBR(R3RQFILE)
+             MONMSG MSGID(CPF0000)
+
+   /**************************************************************/
+   /***  COPY VITRIA FILE TO MCFPCS7100.                       ***/
+   /**************************************************************/
+             CPYF       FROMFILE(*CURLIB/MCFPCSSPRQ) +
+                          TOFILE(MCFPCS7100) MBROPT(*ADD) +
+                          FMTOPT(*MAP *DROP)
+             MONMSG MSGID(CPF0000)
+
+   /**************************************************************/
+   /***  CLEAR VITRIA FILE.                                    ***/
+   /**************************************************************/
+             CLRPFM     FILE(*CURLIB/MCFPCSSPRQ) MBR(*FIRST)
+             MONMSG MSGID(CPF0000)
+
+   /********************************************/
+   /*** CALL THE PO CREATE/REQ LINK PROGRAM  ***/
+   /********************************************/
+    CALL TR3RQUPD
+
+   /*******************************************/
+   /*** REPRINT ERROR REPORT                ***/
+   /*******************************************/
+    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/R3RQUPDF)
+    /*** PRINT NUM ***/
+    CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('025')
+    /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+    CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+    /*** NUMBER OF COPIES ***/
+    CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+    /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+    CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+    /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+    CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('Y')
+    CALL TPRTRPT
+
+ FINI:       ENDPGM

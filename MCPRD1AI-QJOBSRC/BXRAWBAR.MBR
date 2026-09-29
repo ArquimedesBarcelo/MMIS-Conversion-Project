@@ -1,0 +1,29 @@
+             PGM        PARM(&CODE &QTY &UM &RCV)
+ /******************************************************************/
+ /*** BXRAWBAR                                                   ***/
+ /***    THIS PROGRAM IS CALLED FROM THE CSIS RECEIVING DOCK FOR ***/
+ /***    RAW MATERIALS TO SUBMIT A JOB THAT WILL RUN A NON CSIS  ***/
+ /***    PROGRAM TO PRINT A BAR CODE FOR THE RAW MATERIAL INFO   ***/
+ /***    PASSED AS PARAMETERS.                                   ***/
+ /***                                                            ***/
+ /***    ANY LOCATION THAT WANTS TO PRINT THIS BARCODE SHOULD    ***/
+ /***    CHANGE THIS PROGRAM TO SUBMIT A JOB TO DO THE PRINTING. ***/
+ /***    IF NO PRINTING IS DESIRABLE, THEN THE SBMJOB SHOULD BE  ***/
+ /***    COMMENTED OUT AND THE PROGRAM WILL SIMPLY RETURN TO     ***/
+ /***    CSIS RECEIVING.                                         ***/
+ /***                                                            ***/
+ /*** 9/1999                                                     ***/
+ /***    ADDED RECEIVER NUMBER TO LIST OF PARAMETERS.            ***/
+ /***                                                            ***/
+ /******************************************************************/
+             DCL        VAR(&CODE) TYPE(*CHAR) LEN(7)
+             DCL        VAR(&QTY) TYPE(*DEC) LEN(12 4)
+             DCL        VAR(&UM)  TYPE(*CHAR) LEN(2)
+             DCL        VAR(&RCV) TYPE(*CHAR) LEN(14)
+
+ /***        SBMJOB     CMD(CALL PGM(XXXXXX/XXXXXXXX) PARM('&CODE +
+                          &QTY &UM &RCV')) JOB(XXXXXXXX) JOBD(JOBD) +
+                          JOBQ(JOBQ) PRTDEV(*JOBD) OUTQ(*JOBD) +
+                          USER(*JOBD) PRTTXT(*JOBD) CURLIB(*USRPRF) +
+                          INLLIBL(*JOBD)                         ***/
+             ENDPGM

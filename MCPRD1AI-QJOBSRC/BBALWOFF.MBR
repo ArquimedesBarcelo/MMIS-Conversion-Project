@@ -1,0 +1,33 @@
+//BCHJOB  JOB(BBALWOFF) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      C S A S  JOB  'BBALWOFF'    (SR20)                      ##*/
+/*## THIS MONTH END JOB PERFORMS THE BALANCE DOLLAR WRITEOFF FOR  ##*/
+/*## ITEMS WHICH END THE MONTH WITH A DOLLAR BALANCE, BUT NO UNIT ##*/
+/*## BALANCE.  THIS JOB ALSO PERFORMS THE RAW MATERIAL ENDING     ##*/
+/*## DOLLAR WRITEOFF AS DESCRIBED BELOW.                          ##*/
+/*##################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+CMDCALL:
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TBALWOFF)
+/*######################################################*/
+/*## RAW MATERIAL ENDING DOLLAR WRITEOFF FOR AVERAGE  ##*/
+/*## COST.  THE FOLLOWING PGM CREATES THE ACCOUNTING  ##*/
+/*## ADJUSTMENTS SO THAT THE NEW BEGINING DOLLARS     ##*/
+/*## DIVIDED BY NEW BEGINING UNITS WILL EQUAL THE     ##*/
+/*## AVERAGE COST.                                    ##*/
+/*## TWO REPORTS ARE GENERATED TO SHOW THE AMOUNT OF  ##*/
+/*## ADJUSTMENT DOLLARS MADE, ONE IS A DETAIL BY CODE ##*/
+/*## THE OTHER IS A SUMMARY BY CLASS.                 ##*/
+/*## THE ONLY OPTION ACCEPTED IS THE UPDATE-SW WHICH  ##*/
+/*## IS SET TO 'YES' TO DENOTE A LIVE RUN.            ##*/
+/*######################################################*/
+             CALL       PGM(TRAWWOFF)
+YES
+CSASCLS:
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+//ENDBCHJOB

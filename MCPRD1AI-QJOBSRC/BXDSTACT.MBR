@@ -1,0 +1,15 @@
+             PGM /*BXDSTACT*/
+             CALL       MCDLT    PARM('DSTACT10')
+             CALL       MCXRENAM PARM('DSTACT09' 'DSTACT10')
+             CALL       MCXRENAM PARM('DSTACT08' 'DSTACT09')
+             CALL       MCXRENAM PARM('DSTACT07' 'DSTACT08')
+             CALL       MCXRENAM PARM('DSTACT06' 'DSTACT07')
+             CALL       MCXRENAM PARM('DSTACT05' 'DSTACT06')
+             CALL       MCXRENAM PARM('DSTACT04' 'DSTACT05')
+             CALL       MCXRENAM PARM('DSTACT03' 'DSTACT04')
+             CALL       MCXRENAM PARM('DSTACT02' 'DSTACT03')
+             CALL       MCXRENAM PARM('DSTACT01' 'DSTACT02')
+             CALL       MCXRENAM PARM('MANSTR01' 'DSTACT01')
+             CALL       TMNSTRRN
+             STRDBRDR   FILE(QJOBSRC) MBR(BMFSTRLS)
+EOJ:         ENDPGM

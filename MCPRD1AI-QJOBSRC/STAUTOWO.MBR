@@ -1,0 +1,3 @@
+             PGM /*STAUTOWO*/
+             CALL       PGM(MCPRD0/TVBWOGEN)
+EOJ:         ENDPGM

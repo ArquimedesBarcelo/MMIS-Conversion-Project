@@ -1,0 +1,38 @@
+//BCHJOB  JOB(BXAVGRPT) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##       C S A S  JOB  'BXAVGRPT' (SR15)     --REPORT ONLY--   ##*/
+/*## THIS JOB CALCULATES THE AVERAGE COST FOR RAW MATERIALS AND  ##*/
+/*## PRODUCES A REPORT SHOWING THE OLD AND NEW AVERAGE COST      ##*/
+/*## VALUES FOR EACH CODE.  THIS JOB GENERATES A REPORT ONLY,    ##*/
+/*## NO DATABASE UPDATES ARE PERFORMED.                          ##*/
+/*#################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TPROCAVG)
+N
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

@@ -1,0 +1,21 @@
+   PGM
+
+   /*************************************************/
+   /** THIS PROGRAM PROCESSES CCS DATA: TRANSFER,  **/
+   /**   REPORT AND CLEAR.                         **/
+   /** AKRON RESEARCH (118) ONLY.                  **/
+   /** CHANGE THE MCPRT PRTF TO DIRECT REPORT.     **/
+   /*************************************************/
+
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT39)
+             DLTF       FILE(QTEMP/CCSDATA)
+             MONMSG     MSGID(CPF0000)
+             CRTPF      FILE(QTEMP/CCSDATA) RCDLEN(43)
+             OVRDBF     FILE(CCSDATA) TOFILE(QTEMP/CCSDATA)
+
+             CALL       TCCSPROC
+
+             DLTF       FILE(QTEMP/CCSDATA)
+             MONMSG     MSGID(CPF0000)
+
+    ENDPGM

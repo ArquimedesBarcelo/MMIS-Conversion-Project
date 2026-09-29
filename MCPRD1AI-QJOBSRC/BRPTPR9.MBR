@@ -1,0 +1,13 @@
+//BCHJOB  JOB(BRPTPR9) JOBD(MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/RELERRFL)
+             /*** PRINT NUM ***/
+             CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('015')
+             /*** PAPER WIDTH. 'Y' = 132 (COMPRESSED), 'N' = 80 ***/
+             CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('Y')
+             /*** NUMBER OF COPIES ***/
+             CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+             /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+             CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+             CALL TPRTRPT
+//ENDBCHJOB

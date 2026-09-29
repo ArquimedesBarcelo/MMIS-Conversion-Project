@@ -1,0 +1,39 @@
+             PGM /*SR50CL*/
+             /**********************************************************/
+             /* THIS PROGRAM CHECKS TO SEE IF IT IS OKAY TO RUN A CSAS */
+             /* TRANSACTIONS REPORT USING MENU OPTION SR50.  THE USER  */
+             /* WILL NOT BE PERMITTED TO SUBMIT A BATCH JOB TO PRODUCE */
+             /* HIS/HER REPORT IF:                                     */
+             /*    1) A/P MANIFEST DATA IS WAITING TO BE LOADED INTO   */
+             /*       CSAS VIA THE AP5 MENU OPTION.                    */
+             /*          (IF FILE MANSTR01 EXISTS, DATA IS WAITING TO  */
+             /*           TO BE LOADED INTO CSAS.)                     */
+             /*  OR                                                    */
+             /*    2) A/P MANIFEST DATA IS CURRENTLY BEING LOADED INTO */
+             /*       CSAS VIA MENU OPTION AP5 AND BATCH JOB BMFSTRLS. */
+             /*          (IF FILE STACTIVE EXISTS, DATA IS CURRENTLY   */
+             /*           BEING LOADED INTO CSAS (OR THE MOST RECENT   */
+             /*           BMFSTRLS JOB BLEWUP).)                       */
+             /**********************************************************/
+ CHK1:       CHKOBJ     OBJ(*LIBL/MANSTR01) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(CHK2))
+ MSG1:       SNDMSG     MSG('The SR50 option is not available at +
+                          this time because accounts payable +
+                          manifest data is waiting to be loaded +
+                          into CSAS.  The accounting department +
+                          needs to use option AP5 to load this data +
+                          into CSAS before you can use the SR50 +
+                          option,') TOUSR(*REQUESTER) MSGTYPE(*INFO)
+             GOTO       CMDLBL(EOJ)
+ CHK2:       CHKOBJ     OBJ(*LIBL/STACTIVE) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(GOFORIT))
+ MSG2:       SNDMSG     MSG('The SR50 option is not available at +
+                          this time because accounts payable +
+                          manifest data is currently being loaded +
+                          into CSAS.  Once this processing has been +
+                          completed you will be able to use the +
+                          SR50 option.') TOUSR(*REQUESTER) +
+                          MSGTYPE(*INFO)
+             GOTO       CMDLBL(EOJ)
+ GOFORIT:    CALL       PGM(TRPTJ069)
+ EOJ:        ENDPGM

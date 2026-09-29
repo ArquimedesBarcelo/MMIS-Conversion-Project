@@ -1,0 +1,5 @@
+             PGM /*CLRLSBCHLD*/
+             RLSOUTQ    BCHOLD
+             DLYJOB     300
+             HLDOUTQ    BCHOLD
+EOJ:         ENDPGM

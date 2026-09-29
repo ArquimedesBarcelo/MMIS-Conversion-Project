@@ -1,0 +1,58 @@
+//BCHJOB  JOB(BXLIFRPT) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##############################################################*/
+/*##  C S A S  JOB 'BXLIFRPT'         LIFO REPORT  (SR13)     ##*/
+/*##############################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+
+/*##############################################################*/
+/*##  CHECK FOR EXISTENCE OF EACH GENERATION.  IF NOT         ##*/
+/*##  THERE, CREATE IT.                                       ##*/
+/*##############################################################*/
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW7' '080' '5000' '1000' '09')
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW6' '080' '5000' '1000' '09')
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW5' '080' '5000' '1000' '09')
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW4' '080' '5000' '1000' '09')
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW3' '080' '5000' '1000' '09')
+   CALL MCXCRTFIL PARM('*CURLIB' 'AKRNRAW2' '080' '5000' '1000' '09')
+
+/*##############################################################*/
+/*## NOW RENAME GENERATIONS OF THE AKRNRAW2 FILE              ##*/
+/*## AND BUILD NEW ONE.                                       ##*/
+/*##############################################################*/
+   CALL MCDLT    PARM('AKRNRAW7')
+   CALL MCXRENAM PARM('AKRNRAW6' 'AKRNRAW7')
+   CALL MCXRENAM PARM('AKRNRAW5' 'AKRNRAW6')
+   CALL MCXRENAM PARM('AKRNRAW4' 'AKRNRAW5')
+   CALL MCXRENAM PARM('AKRNRAW3' 'AKRNRAW4')
+   CALL MCXRENAM PARM('AKRNRAW2' 'AKRNRAW3')
+
+CMDCALL:
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'AKRNRAW2' +
+                          '080' '5000' '1000' '09')
+             CALL       PGM(TLIFORP2)
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

@@ -1,0 +1,24 @@
+             PGM        /*BRPTFISS*/
+             DCL        VAR(&ROUTE)    TYPE(*CHAR) LEN(80)
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(112)
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS5901) SHARE(*YES)
+             OVRDBF     FILE(MCFLCSUSAG) SHARE(*YES)
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS5901) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCSUSAG) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+CMDCALL:
+             CHGVAR     VAR(&ROUTE) VALUE('MATCONT        +
+                          1210038MCMGR   MCMGR   MCPRD   01    01    -
+                      ')
+             CALL       TRPTFISS PARM(&ROUTE &DATALINE)
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)
+             CLOF       OPNID(MCFLCS5901)
+             CLOF       OPNID(MCFLCSUSAG)
+ENDPGM

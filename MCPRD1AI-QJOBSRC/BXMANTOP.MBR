@@ -1,0 +1,25 @@
+//BCHJOB  JOB(BMANCRTE) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             CALL       PGM(CLMANCRT)
+             CALL       MCDLT    PARM('MANWKFL5')
+             CALL       MCXRENAM PARM('MANWKFL4' 'MANWKFL5')
+             CALL       MCXRENAM PARM('MANWKFL3' 'MANWKFL4')
+             CALL       MCXRENAM PARM('MANWKFL2' 'MANWKFL3')
+             CALL       MCXRENAM PARM('MANWKFL1' 'MANWKFL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'MANWKFL1' +
+                          '005' '1000' '1000' '20')
+             CALL       MCDLT    PARM('MANAKFL9')
+             CALL       MCXRENAM PARM('MANAKFL8' 'MANAKFL9')
+             CALL       MCXRENAM PARM('MANAKFL7' 'MANAKFL8')
+             CALL       MCXRENAM PARM('MANAKFL6' 'MANAKFL7')
+             CALL       MCXRENAM PARM('MANAKFL5' 'MANAKFL6')
+             CALL       MCXRENAM PARM('MANAKFL4' 'MANAKFL5')
+             CALL       MCXRENAM PARM('MANAKFL3' 'MANAKFL4')
+             CALL       MCXRENAM PARM('MANAKFL2' 'MANAKFL3')
+             CALL       MCXRENAM PARM('MANAKFL1' 'MANAKFL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'MANAKFL1' +
+                          '080' '1000' '1000' '20')
+             CALL       MCDLT    PARM(MANRPTFL)
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'MANRPTFL' +
+                          '133' '1000' '1000' '20')
+CALL       PGM(TMANCRTE)

@@ -1,0 +1,26 @@
+             PGM /*CLMANBOT*/
+             DCL        VAR(&MANTYPE) TYPE(*CHAR) LEN(1)
+             RTVDTAARA  DTAARA(*LDA (288 1)) RTNVAR(&MANTYPE)
+
+             OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/MANRPTFL)
+                CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')
+                CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('011')
+                CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+                CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+                CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+             CALL TPRTRPT
+
+             IF (&MANTYPE *EQ '3')  THEN(DO)
+                 CALL TINVTC
+                    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/STRRPTFL)
+                 CALL TPRTRPT
+               ENDDO
+             IF ((&MANTYPE *EQ '1') *OR (&MANTYPE *EQ '2')        +
+                     *OR (&MANTYPE *EQ '3'))  THEN(DO)
+                 CALL       PGM(TPAYIRPT)
+                    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/INVRPTFL)
+                 CALL TPRTRPT
+                    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/PAYRPTFL)
+                 CALL TPRTRPT
+               ENDDO
+ EOJ:        ENDPGM

@@ -1,0 +1,12 @@
+             PGM
+/********************************************************************/
+/* BCHATPROC                                                        */
+/*    THIS JOB WILL CALL THE PROGRAM TCHATUPDT TO UPDATE THE        */
+/*    SAME FILE WITH NEW DATA SENT FROM THE CHESS SYSTEM WHICH WILL */
+/*    BE IN THE FILE(CHATNO) MBR(CHATNO01).                         */
+/********************************************************************/
+
+             OVRDBF     FILE(CHATNO) TOFILE(CHATNO) MBR(CHATNO01)
+             CALL       PGM(TCHTUPDT)
+
+             ENDPGM

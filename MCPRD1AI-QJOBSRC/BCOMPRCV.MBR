@@ -1,0 +1,11 @@
+//BCHJOB  JOB(BCOMPRCV) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *JOBD) LOGCLPGM(*YES)
+/*********************************************************************/
+/***  UPDATE CODES OUT OF BALANCE?  (Y/N)                          ***/
+/***  IS THIS AN INITIAL LOAD?  (Y/N)                              ***/
+/*********************************************************************/
+           OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+           CALL       PGM(TCOMPRCV)
+NO
+YES
+//ENDBCHJOB

@@ -1,0 +1,7 @@
+   PGM /*STLBRFILE*/
+   CALL       MCDLT PARM('LBRFILE')
+   CRTPF      FILE(LBRFILE) RCDLEN(53) SIZE(1000 1000 30)
+             OVRPRTF    FILE(MCPRT) TOFILE(QPRINT)
+             CALL       PGM(TLBRFILE) PARM('                          +
+                          ')
+   ENDPGM

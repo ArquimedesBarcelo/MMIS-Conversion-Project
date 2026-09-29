@@ -1,0 +1,3 @@
+             PGM        /*BMTDCSAS*/
+             CALL       TMTDCSAS
+ENDPGM

@@ -1,0 +1,6 @@
+             PGM /*CLVWOCRT*/
+/*   CREATE FILE THAT CONTAINS VERBAL WORKORDERS TO BE            */
+/*   GENERATED FOR EACH SHIFT.                                    */
+                 CALL   PGM(MCXCRTFIL) PARM('*CURLIB' 'VERBWOFL' +
+                          '200' '1000' '1000' '20')
+ EOJ:        ENDPGM

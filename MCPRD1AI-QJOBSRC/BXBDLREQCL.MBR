@@ -1,0 +1,7 @@
+/***********************************************************/
+/**  THIS IS A CL PROGRAM TO DO A STRDBRDR FOR BXAPDELT   **/
+/**  SO IT CAN BE EXECUTED VIA SLEEPER                    **/
+/***********************************************************/
+PGM
+             STRDBRDR   FILE(MCPRD1/QJOBSRC) MBR(BXBDLREQ)
+ENDPGM

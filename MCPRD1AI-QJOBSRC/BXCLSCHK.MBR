@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BXCLSCHK) JOBD(*libl/mcmgr) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##         C S A S  JOB  'BXCLSCHK'    (SR25)                  ##*/
+/*## THIS JOB PRODUCES A CSAS CLASS CHECK REPORT.                ##*/
+/*#################################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TCLASCHK)
+//ENDBCHJOB

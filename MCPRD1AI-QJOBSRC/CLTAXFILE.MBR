@@ -1,0 +1,9 @@
+             PGM /*CLTAXFILE*/
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(16)
+
+             CLRPFM     FILE(MCPRD1/TAXRPT)
+
+/* RUN FOR XXXXXX TO XXXXXX */
+             CHGVAR     VAR(&DATALINE) VALUE('2000040120000430')
+             CALL       PGM(TTAXFILE) PARM(&DATALINE)
+             ENDPGM

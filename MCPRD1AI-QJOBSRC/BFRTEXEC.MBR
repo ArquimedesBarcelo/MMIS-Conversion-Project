@@ -1,0 +1,71 @@
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&JCWVALUE) TYPE(*CHAR) LEN(1)
+
+ALLOCATIT:
+       /*******************************************************************/
+       /*   THE FOLLOWING COMMAND WAS COMMENTED OUT AND REPLACED WITH THE */
+       /*   COMMAND FOLLOWING IT FOR TESTING PURPOSES.  WHEN GOING LIVE,  */
+       /*   THE ORIGINAL COMMAND SHOULD BE REINSTATED.                    */
+       /*******************************************************************/
+       /*    ALCOBJ     OBJ((*CURLIB/FRTDATA *FILE *EXCL *FIRST)) + */
+       /*                 WAIT(5)                                   */
+             ALCOBJ     OBJ((MCPRD1/FRTDATA *FILE *EXCL *FIRST)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+   /**************************************************************/
+   /***  CHECK FOR EXISTENCE OF EACH GENERATION.  IF NOT       ***/
+   /***  THERE, CREATE IT.  NOTE!  *CURLIB IS USED FOR         ***/
+   /***  ALL FILE CREATES, DELETES, RENAMES, AND OVRDBFS!      ***/
+   /**************************************************************/
+ /***********************************************************************/
+ /*   THE FOLLOWING 2 COMMANDS WERE COMMENTED OUT AND REPLACED WITH THE */
+ /*   COMMANDS FOLLOWING THEM FOR TESTING PURPOSES.  WHEN GOING LIVE,   */
+ /*   THE ORIGINAL COMMANDS SHOULD BE REINSTATED.                       */
+ /***********************************************************************/
+       /*    CALL       PGM(TGENFILE) PARM('FRTDATA' 'FRTDATA' '10' +  */
+       /*                 '*CURLIB' '0133' '05000' '05000' '20' &S)    */
+       /*    CALL       PGM(CCRTFILE) PARM('*CURLIB' 'FRTDATA' +       */
+       /*                 '133' '5000' '5000' '20' &S)                 */
+             CALL       PGM(TGENFILE) PARM('FRTDATA' 'FRTDATA' '10' +
+                          'MCPRD1' '0133' '05000' '05000' '20' &S)
+             CALL       PGM(CCRTFILE) PARM('MCPRD1' 'FRTDATA' +
+                          '133' '5000' '5000' '20' &S)
+
+   /*** OVERRIDE TO DESIRED PRINTER FOR REPORTS   ***/
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT97)
+
+   /********************************************************/
+   /*** WHAT THE HECK, CALL THE PROGRAM...               ***/
+   /********************************************************/
+ /*******************************************************************/
+ /*   THE FOLLOWING COMMAND WAS COMMENTED OUT AND REPLACED WITH THE */
+ /*   COMMAND FOLLOWING IT FOR TESTING PURPOSES.  WHEN GOING LIVE,  */
+ /*   THE ORIGINAL COMMAND SHOULD BE REINSTATED.                    */
+ /*******************************************************************/
+ /* OVRDBF     FILE(APPLFRGT) TOFILE(*CURLIB/FRTDATA2)              */
+    OVRDBF     FILE(APPLFRGT) TOFILE(MCPRD1/FRTDATA2)
+    CALL TFRTPROC
+ /*******************************************************************/
+ /*   THE FOLLOWING COMMAND WAS COMMENTED OUT AND REPLACED WITH THE */
+ /*   COMMAND FOLLOWING IT FOR TESTING PURPOSES.  WHEN GOING LIVE,  */
+ /*   THE ORIGINAL COMMAND SHOULD BE REINSTATED.                    */
+ /*******************************************************************/
+ /*DLCOBJ     OBJ((*CURLIB/FRTDATA *FILE *EXCL *FIRST))    */
+   DLCOBJ     OBJ((MCPRD1/FRTDATA *FILE *EXCL *FIRST))
+   /********************************************************/
+   /*** START THE FRT STATUS AND CSAS TRANSACTIONS RPTS  ***/
+   /********************************************************/
+             STRDBRDR   FILE(MCPRD1/QJOBSRC) MBR(BXFRTSTT) +
+                          JOBQ(HBATCH) RDR(BXFRTSTT)
+             STRDBRDR   FILE(MCPRD1/QJOBSRC) MBR(BCSASTRN) +
+                          JOBQ(HBATCH) RDR(BCSASTRN)
+   ENDPGM

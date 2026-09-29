@@ -1,0 +1,21 @@
+//BCHJOB  JOB(EDICRTE) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE RELFILE FILE       ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+   CALL MCDLT    PARM('EDIABS05')
+   CALL MCXRENAM PARM('EDIABS04' 'EDIABS05')
+   CALL MCXRENAM PARM('EDIABS03' 'EDIABS04')
+   CALL MCXRENAM PARM('EDIABS02' 'EDIABS03')
+   CALL MCXRENAM PARM('EDIABST' 'EDIABS02')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'EDIABST' +
+                 '160' '1000' '1000' '30')
+   CALL MCDLT    PARM('EDIRPTFL')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'EDIRPTFL' +
+                 '133' '1000' '1000' '30')
+   CALL MCDLT    PARM('EDIERRFL')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'EDIERRFL' +
+                 '133' '1000' '1000' '30')
+CALL FOTEDIABST

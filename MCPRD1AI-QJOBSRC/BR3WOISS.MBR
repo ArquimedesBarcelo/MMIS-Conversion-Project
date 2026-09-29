@@ -1,0 +1,100 @@
+   PGM PARM(&MBR &FILE &LIB)
+   /**************************************************************/
+   /*** BR3WOISS:  JOB TO START PROGRAM TO UPDATE MMIS         ***/
+   /***            MATERIAL RECORDS WITH ISSUES THAT HAVE      ***/
+   /***            BEEN RECORDED BY SAP/R3.                    ***/
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+             DCL        VAR(&MBR) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FILE) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&LIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&RECORDS) TYPE(*DEC) LEN(10 0)
+
+             DCL        VAR(&HR) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&MIN) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SEC) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&MM) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&DD) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&NEWMBR) TYPE(*CHAR) LEN(10)
+
+             CHGCURLIB  CURLIB(MCPRD1)
+
+
+/*** ALLOCATE R3WOISS TO PREVENT A COLLISION WITH SAPCOMM WHICH     */
+/*** MIGHT BE SENDING DATA INTO R3WOISSUE AT THE TIME THIS JOB RUNS */
+ALLOCATIT:
+             ALCOBJ     OBJ((*CURLIB/R3WOISS *FILE *EXCL R3WOISS)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+/*** MOVE FROM R3WOISSUE TO R3WOISS FOR BATCH PROCESSING ***/
+             CPYF       FROMFILE(&LIB/&FILE) TOFILE(*CURLIB/R3WOISS) +
+                          FROMMBR(&MBR) TOMBR(R3WOISS) +
+                          MBROPT(*REPLACE) FMTOPT(*NOCHK)
+             MONMSG MSGID(CPF0000) EXEC(DO)
+               SNDPGMMSG  MSG('Copy from R3WOISSUE file to R3WOISS +
+                          was not successful.  Please check job log.')
+               GOTO CMDLBL(FINI)
+             ENDDO
+
+ /*** RETRIEVE NUMBER OF RECORDS IN FILE.  IF ZERO THEN DATA HAS    ***/
+ /*** BEEN PROCESSED ALREADY BY A PREVIOUS JOB.  SIMPLY END THE JOB ***/
+             RTVMBRD    FILE(*CURLIB/R3WOISS) MBR(R3WOISS) +
+                          NBRCURRCD(&RECORDS)
+             IF         COND(&RECORDS *EQ 0) THEN(DO)
+               DLCOBJ   OBJ((*CURLIB/R3WOISS *FILE *EXCL R3WOISS))
+               GOTO     CMDLBL(FINI)
+             ENDDO
+
+
+   /********************************************************/
+   /*** CREATE A NEW MEMBER FOR THE MATERIAL UPDATE      ***/
+   /*** FILE FROM SYNERGY.  THE MEMBER NAME STARTS WITH  ***/
+   /*** "I" FOLLOWED BY THE MONTH, DAY, AND TIME (ONLY   ***/
+   /*** FIRST DIGIT OF SECONDS BECAUSE 1ST CHARACTER     ***/
+   /*** OF MEMBER HAD TO BE ALPHABETIC).                 ***/
+   /********************************************************/
+
+             RTVSYSVAL  SYSVAL(QHOUR) RTNVAR(&HR)
+             RTVSYSVAL  SYSVAL(QMINUTE) RTNVAR(&MIN)
+             RTVSYSVAL  SYSVAL(QSECOND) RTNVAR(&SEC)
+             RTVSYSVAL  SYSVAL(QMONTH) RTNVAR(&MM)
+             RTVSYSVAL  SYSVAL(QDAY) RTNVAR(&DD)
+             CHGVAR     VAR(&NEWMBR) VALUE('I' *CAT &MM *CAT &DD +
+                          *CAT &HR *CAT &MIN *CAT &SEC)
+
+             CPYF       FROMFILE(*CURLIB/R3WOISS) +
+                          TOFILE(*CURLIB/R3WOISS) FROMMBR(R3WOISS) +
+                          TOMBR(&NEWMBR) MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+
+             CLRPFM     FILE(*CURLIB/R3WOISS) MBR(R3WOISS)
+             MONMSG MSGID(CPF0000)
+
+             OVRDBF     FILE(R3WOISS) TOFILE(*CURLIB/R3WOISS) +
+                          MBR(&NEWMBR)
+
+             DLCOBJ     OBJ((*CURLIB/R3WOISS *FILE *EXCL R3WOISS))
+
+   /****************************************************/
+   /* CALL THE R/3 WORK ORDER MATERIALS UPDATE PROGRAM */
+   /****************************************************/
+
+    CALL TR3WOISS
+
+FINI:
+
+/** REMOVE R/3 MEMBER FROM THE R/3 FILE **/
+
+    RMVM       FILE(&LIB/&FILE) MBR(&MBR)
+    MONMSG MSGID(CPF0000) EXEC(DO)
+         SNDPGMMSG  MSG('Removal of member from file was not +
+                      successful.  Please check job log.')
+    ENDDO
+
+    ENDPGM

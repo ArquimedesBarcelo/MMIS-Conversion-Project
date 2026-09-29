@@ -1,0 +1,3 @@
+             PGM /*CLPOCLNP*/
+             STRDBRDR   FILE(*LIBL/QJOBSRC) MBR(BPOCLNUP)
+EOJ:         ENDPGM

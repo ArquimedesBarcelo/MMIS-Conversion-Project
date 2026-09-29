@@ -1,0 +1,28 @@
+   PGM PARM(&MBR &FILE &LIB)
+   /**************************************************************/
+   /*** THIS JOB SHOULD BE RUN IN A SINGLE-THREADED JOBQ       ***/
+   /**************************************************************/
+             DCL        VAR(&MBR) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FILE) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&LIB) TYPE(*CHAR) LEN(10)
+
+             CHGCURLIB  CURLIB(MCPRD1)
+
+             CPYF       FROMFILE(&LIB/&FILE) +
+                          TOFILE(MCPRDB/MCFPCSPCAT) FROMMBR(&MBR) +
+                          MBROPT(*ADD) FMTOPT(*NOCHK)
+
+             SBMJOB     CMD(CALL PGM(MCPRDB/BXLOAD832)) JOB(BXLOAD832) +
+                          JOBD(MCMGR) JOBQ(HLBATCH) PRTDEV(*JOBD) +
+                          OUTQ(*JOBD) USER(*JOBD) PRTTXT(*JOBD) +
+                          CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+FINI:
+/** REMOVE MEMBER FROM THE PRICE CATALOG FILE **/
+    RMVM       FILE(&LIB/&FILE) MBR(&MBR)
+    MONMSG MSGID(CPF0000) EXEC(DO)
+         SNDPGMMSG  MSG('Removal of member from file was not +
+                      successful.  Please check job log.')
+    ENDDO
+
+    ENDPGM

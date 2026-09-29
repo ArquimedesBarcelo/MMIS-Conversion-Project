@@ -1,0 +1,161 @@
+             PGM        PARM(&RETURNCODE)
+
+ /********************************************************************/
+ /*  FILE TRANSFER WAS REQUESTED....                                 */
+ /*     OVERRIDE QTXTSRC TO THE CORRECT INPUT MEMBER NAME            */
+ /*     CALL TCCSFTP TO LOAD THE FILE TRANSFER INFORMATION           */
+ /*     END QTXTSRC OVERRIDE                                         */
+ /*     EXECUTE FTP COMMAND WITH INPUT OVERRIDES                     */
+ /*     RETURN SUCCESS(0) OR FAILURE(1) IN PARAMETER                 */
+ /*                                                                  */
+ /*  THE VARIABLE RMTSYS SHOULD BE CHANGED TO REFLECT THE REMOTE     */
+ /*      SYSTEM HOST NAME.                                           */
+ /*  THE VARIABLE USER AND PWD VARIABLE SHOULD BE CHANGED TO REFLECT */
+ /*      THE USER AND PASSWORD ON THE REMOTE SYSTEM.                 */
+ /*  THE VARIABLE TFILE SHOULD BE CHANGED TO REFLECT THE REMOTE FILE */
+ /*      PATH AND NAME (NOTE THAT THE FILE NAME WILL BE APPENDED     */
+ /*      WITH THE EXTENSION ".jddd", WHERE ddd IS THE JULIAN DATE.   */
+ /********************************************************************/
+
+             DCL        VAR(&RETURNCODE) TYPE(*CHAR) LEN(1) /* 0 = SUCCESS */
+                                                            /* 1 = FAILURE */
+             DCL        VAR(&RETRY)  TYPE(*DEC)  LEN(1 0) VALUE(0)
+             DCL        VAR(&FTPFLAG) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&MEMBER) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&RMTSYS) TYPE(*CHAR) LEN(10)  VALUE('RDSRV6')
+                                                          /* 163.243.17.121 */
+             DCL        VAR(&USER)   TYPE(*CHAR) LEN(10)  VALUE('CCS')
+             DCL        VAR(&PWD)    TYPE(*CHAR) LEN(10)  VALUE('CCS')
+             DCL        VAR(&FFILE)  TYPE(*CHAR) LEN(32) +
+                                     VALUE('QTEMP/CCSDATA.CCSDATA')
+             DCL        VAR(&TFILE)  TYPE(*CHAR) LEN(50) +
+                                     VALUE('/apps/ccs/data/ccsdata')
+             DCL        VAR(&TTYPE)  TYPE(*CHAR) LEN(10)  VALUE('ASCII')
+
+             DCL        VAR(&DATE) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&JULIAN) TYPE(*CHAR) LEN(5)
+             DCL        VAR(&TIME) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&MSGDTA) TYPE(*CHAR) LEN(80)
+
+             CHGVAR     VAR(&RETURNCODE) VALUE('0')
+ FTPSEND:
+             OVRDBF     FILE(QTXTSRC) TOFILE(QJOBSRC) MBR(CCSFTPIN)
+             MONMSG     MSGID(CPF0000)
+
+             CALL       PGM(TCCSFTP) PARM(&USER &PWD &FFILE &TFILE &TTYPE)
+             MONMSG     MSGID(CPF0000)
+
+             DLTOVR     FILE(QTXTSRC)
+             MONMSG     MSGID(CPF0000)
+
+ /*  IBM FTP PROCEDURES                                              */
+ /*     CLEAR THE OUTPUT DATA FILE BEFORE USING                      */
+ /*     OVERRIDE INPUT FILE TO FILE CONTAINING FILE TRANSFER INFO    */
+ /*     OVERRIDE OUTPUT FILE TO FILE CONTAINING FILE TRANSFER INFO   */
+ /*     EXECUTE THE STRTCPFTP FILE TRANSFER COMMAND                  */
+ /*     REMOVE THE INPUT FILE OVERRIDE                               */
+
+ FTP:
+             CLRPFM     FILE(QJOBSRC) MBR(CCSFTPOUT)
+             MONMSG     MSGID(CPF0000)
+
+             OVRDBF     FILE(INPUT) TOFILE(QJOBSRC) MBR(CCSFTPIN)
+             MONMSG     MSGID(CPF0000)
+
+             OVRDBF     FILE(OUTPUT) TOFILE(QJOBSRC) MBR(CCSFTPOUT)
+             MONMSG     MSGID(CPF0000)
+
+             FTP        RMTSYS(&RMTSYS)
+
+/* TCPIP SERVICES NOT AVAILABLE.  DELAY JOB AND TRY AGAIN. */
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                 DLTOVR     FILE(INPUT)
+                 MONMSG     MSGID(CFP0000)
+                 DLTOVR     FILE(OUTPUT)
+                 MONMSG     MSGID(CPF0000)
+                 GOTO       CMDLBL(FTPERR)
+             ENDDO
+
+             DLTOVR     FILE(INPUT)
+             MONMSG     MSGID(CPF0000)
+
+             DLTOVR     FILE(OUTPUT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  PRINT FTP OUTPUT FILE                                           */
+             CPYSRCF    FROMFILE(QJOBSRC) TOFILE(*PRINT) FROMMBR(CCSFTPOUT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  VERIFY SUCCESSFUL FILE TRANSFER                                 */
+             OVRDBF     FILE(QTXTSRC) TOFILE(QJOBSRC) MBR(CCSFTPOUT)
+             MONMSG     MSGID(CPF0000)
+
+             CHGVAR     VAR(&FTPFLAG) VALUE('0')
+
+             CALL       PGM(TCCSFTPCHK) PARM(&FTPFLAG)
+             MONMSG     MSGID(CPF0000)
+
+             DLTOVR     FILE(QTXTSRC)
+             MONMSG     MSGID(CPF0000)
+
+             IF         COND(&FTPFLAG ¬= '0') THEN(DO)
+
+ /*  AN ERROR OCCURRED IN THE FILE TRANSFER ROUTINE.                 */
+ /*     SEND A MESSAGE TO LOG THE ERROR                              */
+ /*     COPY THE OUTPUT MEMBER SO SOMEONE CAN CHECK OUT THE ERROR    */
+
+             RTVSYSVAL  SYSVAL(QDATE) RTNVAR(&DATE)
+             RTVSYSVAL  SYSVAL(QTIME) RTNVAR(&TIME)
+
+             CVTDAT     DATE(&DATE) TOVAR(&JULIAN) FROMFMT(*SYSVAL) +
+                          TOFMT(*JUL) TOSEP(*NONE)
+             MONMSG     MSGID(CPF0000)
+
+             CHGVAR     VAR(&MEMBER) VALUE('Z' *CAT +
+                          %SST(&JULIAN 3 3) *CAT %SST(&TIME 1 6))
+
+             SNDMSG     MSG('FTP File Transfer Error: Output in +
+                          QJOBSRC member ' *CAT &MEMBER) +
+                          TOMSGQ(QSYSOPR)
+             MONMSG     MSGID(CPF0000)
+
+             CPYSRCF    FROMFILE(QJOBSRC) TOFILE(QJOBSRC) +
+                          FROMMBR(CCSFTPOUT) TOMBR(&MEMBER)
+             MONMSG     MSGID(CPF0000)
+
+             CHGVAR     VAR(%SST(&MEMBER 1 1)) VALUE('X')
+
+             CPYSRCF    FROMFILE(QJOBSRC) TOFILE(QJOBSRC) +
+                          FROMMBR(CCSFTPIN) TOMBR(&MEMBER)
+             MONMSG     MSGID(CPF0000)
+
+             GOTO       CMDLBL(FTPERR)
+
+             ENDDO
+             GOTO       CMDLBL(EXIT)
+
+
+ /*  FILE TRANSFER PROCEDURES ARE COMPLETE                           */
+
+
+ FTPERR:     CHGVAR     VAR(&RETRY) VALUE(&RETRY + 1)
+             IF         COND(&RETRY *LT 1) THEN(DO)
+                 CHGVAR     VAR(&MSGDTA) VALUE('*ERROR BXCCSFTP* FTP COMMAND +
+                            FAILED FOR CCS DATA, AUTOMATIC RETRY STARTED')
+                 SNDMSG     MSG(&MSGDTA) TOMSGQ(*SYSOPR)
+                 DLYJOB     DLY(60)
+                 GOTO       FTP
+             ENDDO
+             ELSE       DO
+             CHGVAR     VAR(&MSGDTA) VALUE('*ERROR BXCCSFTP* File +
+                         CCS DATA not transferred +
+                         after 3 tries.')
+             GOTO       CMDLBL(ABEND)
+             ENDDO
+
+ ABEND:      SNDMSG MSG(&MSGDTA) TOMSGQ(*SYSOPR)
+             DSPJOBLOG  OUTPUT(*PRINT)
+             CHGVAR VAR(&RETURNCODE) VALUE('1')
+ EXIT:       RETURN
+             ENDPGM

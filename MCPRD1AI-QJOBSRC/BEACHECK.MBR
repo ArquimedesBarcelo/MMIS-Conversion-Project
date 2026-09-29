@@ -1,0 +1,18 @@
+//BCHJOB  JOB(BEACHECK) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*## BEACHECK- DOES CHECKING ON ONLINE REQ APPROVAL SYSTEM        ##*/
+/*## Y UPDATE?                                                    ##*/
+/*## N RELEASE DATES?                                             ##*/
+/*## N WO EXIST?                                                  ##*/
+/*## Y PATHS UNAPPROVED                                           ##*/
+/*## N PATHS RELEASED                                             ##*/
+/*##################################################################*/
+CALL PGM(TEACHECK)
+Y
+N
+Y
+Y
+N
+000000
+//ENDBCHJOB

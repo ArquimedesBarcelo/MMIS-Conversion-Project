@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BXAUTOR20) JOBD(MCPRD1/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      M M I S  JOB  'BXAUTOR20'   (PAD)                       ##*/
+/*## THIS IS THE AUTOMATIC END-OF-SHIFT JOB TO SHOW THE RESPONSE  ##*/
+/*## AND REPAIR TIMES FOR ALL WORK ORDERS AND ALL EQUIPMENT.      ##*/
+/*##################################################################*/
+             CALL       PGM(STAUTOR20)
+//ENDBCHJOB

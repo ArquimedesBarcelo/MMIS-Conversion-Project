@@ -1,0 +1,65 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+   /**************************************************************/
+   /*** MNFSINIT                                               ***/
+   /***    - THIS JOB WILL PERFORM ALL NECESSARY STEPS TO      ***/
+   /***      GENERATE THE MANUFACTURER/PART NUMBER FILE.       ***/
+   /**************************************************************/
+
+   /* CHANGE THE JOB TO INSURE THAT A JOBLOG IS PRODUCED FOR NOW.    */
+             CHGJOB     LOG(4 0 *SECLVL) LOGCLPGM(*YES)
+
+   /* ESTABLISH THE CURLIB.  FILES WILL BE CREATED IN THIS LIBRARY.  */
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /* DELETE FILES */
+             CALL       PGM(MCDLT) PARM('PARTWMANUF')
+             CALL       PGM(MCDLT) PARM('PARTWOMNF')
+             CALL       PGM(MCDLT) PARM('PARTWOMNF2')
+             CALL       PGM(MCDLT) PARM('MANUFRPTFL')
+
+   /* RUN QUERIES TO CREATE FILES */
+             RUNQRY     QRY(MCPRD/PARTWMANUF)
+             RUNQRY     QRY(MCPRD/PARTWOMNF)
+             RUNQRY     QRY(MCPRD/PARTWOMNF2)
+             RUNQRY     QRY(MCPRD/MANUFRPTFL)
+
+   /* GRANT *PUBLIC *ALL AUTHORITY TO THE FILES JUST CREATED  */
+   /* SO THAT THEY CAN BE DELETED THE NEXT TIME THAT THIS PGM IS RUN. */
+             GRTOBJAUT  OBJ(PARTWMANUF) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(PARTWOMNF) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(PARTWOMNF2) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MANUFRPTFL) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+
+   /* ESTABLISH THE PROPER OVERRIDES TO DIRECT THE QUERY REPORTS AS  */
+   /* DESIRED.                                                       */
+   /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Worksheet: ' *CAT +
+                          &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+   /* OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE AND OUTQ     */
+   /*   LENGTH X WIDTH                                               */
+   /*       11 X 14 PAPER  - PAGESIZE(66 132) LPI(6) CPI(10)         */
+   /*      8.5 X 14 PAPER  - PAGESIZE(68 132) LPI(8) CPI(10)         */
+   /*       11 X 8.5 PAPER - PAGESIZE(66 132) LPI(6) CPI(16.7)       */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(10) OVRFLW(60) SPOOL(*YES) +
+                          OUTQ(*LIBL/QQRX) HOLD(*YES) USRDTA(STATRPT)
+             MONMSG     MSGID(CPF0000)
+
+   /* RUN THE QUERY REPORT PROGRAM.                                */
+             RUNQRY     QRY(MCPRD/MANUFRPT)
+
+   /* COPY INTO CSIS DATABASE FILE.                                */
+             CPYF       FROMFILE(MANUFRPTFL) TOFILE(MCFPCSMANF) +
+                          MBROPT(*ADD) FMTOPT(*MAP *DROP)
+
+             ENDPGM

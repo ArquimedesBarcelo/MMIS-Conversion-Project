@@ -1,0 +1,11 @@
+//BCHJOB  JOB(BR3PURCH) JOBD(*libl/MCMGR) JOBQ(HLBATCH) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             CHGCURLIB MCPRD1
+             CALL       PGM(TR3PURCH)
+B
+             CALL       PGM(TR3PURCH)
+L
+             CALL       PGM(TR3PURCH)
+P
+
+//ENDBCHJOB

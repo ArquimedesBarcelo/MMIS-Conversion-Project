@@ -1,0 +1,13 @@
+             PGM
+/********************************************************************/
+/* BRPTPROC                                                         */
+/*    THIS JOB WILL CALL THE PROGRAM TBLOWRPT TO PRINT THE DAILY    */
+/*    BLOWUP REPORT.                                                */
+/********************************************************************/
+
+             OVRDBF     FILE(DLYBLUP) TOFILE(MCPRD1/DLYBLUP) MBR(DLYBLUP3)
+             OVRDBF     FILE(ROUTESLIP) TOFILE(MCPRD1/ROUTESLIP) MBR(ROUTESLIP)
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT25)
+             CALL       PGM(TBLOWRPT) PARM(N)
+
+             ENDPGM

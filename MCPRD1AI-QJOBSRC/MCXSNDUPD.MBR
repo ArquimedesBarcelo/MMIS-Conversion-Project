@@ -1,0 +1,65 @@
+             PGM        /* Run Update Report & send to Akron */
+
+             DCL        VAR(&QRYSLT) TYPE(*CHAR) LEN(100)
+             DCL        VAR(&NEWDATE) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(30)
+ BEGIN:
+
+ /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+
+             RTVNETA    SYSNAME(&SYSTEM)
+
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Update Rpt: ' +
+                          *CAT &SYSTEM)
+
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(12) OVRFLW(60) OUTQ(PD01) +
+                          USRDTA(MNFUPDRPT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  GENERATE THE REPORT                                           */
+             RUNQRY     QRY(MCPRD/MNFUPDRPT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  SEND THE GENERATED SPOOL FILE TO AKRON60                      */
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+ /*  OEM REPORT                                                    */
+
+             CHGVAR     VAR(&PRINTTEXT) VALUE('OEM Update Rpt: ' +
+                          *CAT &SYSTEM)
+
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(12) OVRFLW(60) OUTQ(PD01) +
+                          USRDTA(MNFUPDRPT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  GENERATE THE REPORT                                           */
+             RUNQRY     QRY(MCPRD/OEMUPDRPT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  SEND THE GENERATED SPOOL FILE TO AKRON60                      */
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/*  RUN PROGRAM TO UPDATE COMPLETE STATUS.                        */
+            CALL       PGM(TMNFCMPL)
+            CALL       PGM(TOEMCMPL)
+
+ FINI:
+
+             ENDPGM

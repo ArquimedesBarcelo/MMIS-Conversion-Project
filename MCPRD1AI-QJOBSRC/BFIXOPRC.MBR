@@ -1,0 +1,10 @@
+//BCHJOB  JOB(BFIXOPRC) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+/****************************************************************/
+/*   PROGRAM PARAMETERS:  Y=DTRANS UPDATED                      */
+/*                        N=DTRANS NOT UPDATED; REPORT ONLY     */
+/****************************************************************/
+             CALL       PGM(TFIXOPRC)
+N
+//ENDBCHJOB

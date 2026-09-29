@@ -1,0 +1,18 @@
+   PGM
+   /**************************************************************/
+   /*** CLUPDQA - THIS PROCEDURE IS USED TO UPDATE THE VALUES  ***/
+   /***           IN THE QA ENVIRONMENT.                       ***/
+   /***           REQUEST 2004-77306                           ***/
+   /**************************************************************/
+
+             CHGJOB     LOG(4 0 *SECLVL) LOGCLPGM(*YES)
+
+             CHGCURLIB  CURLIB(MCQA1)
+
+   /* CALL COBOL PROGRAM TUPDQA TO UPDATE PLANT STARTUP VALUES.      */
+             CALL       PGM(TUPDQA)
+
+   /* CALL SQL PROGRAM SQLUPDQA TO UPDATE OTHER QA FILES.            */
+             CALL       PGM(SQLUPDQA)
+
+             ENDPGM

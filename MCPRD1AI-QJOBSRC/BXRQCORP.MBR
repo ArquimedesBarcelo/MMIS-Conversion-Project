@@ -1,0 +1,52 @@
+             PGM
+             /*** CREATE FLAG FILE TO MAKE SURE NO OTHER REQ ***/
+             /*** CREATE JOBS ARE RUNNING.                   ***/
+             CRTPF      FILE(MA4ACTIV) RCDLEN(1) SIZE(1 1)
+             GRTOBJAUT  OBJ(*CURLIB/MA4ACTIV) OBJTYPE(*FILE) +
+                          USER(*PUBLIC) AUT(*ALL)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(ENDTHEJOB))
+
+             /*** MAKE SURE ALL THE GENERATIONS EXIST ***/
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPFIL4' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPFIL3' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPFIL2' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPFILE' +
+                          '020' '1000' '1000' '20')
+
+             /*** RENAME GENERATIONS OF REQUISITION FILE ***/
+             CALL       MCDLT    PARM('CORPFIL4')
+             CALL       MCXRENAM PARM('CORPFIL3' 'CORPFIL4')
+             CALL       MCXRENAM PARM('CORPFIL2' 'CORPFIL3')
+             CALL       MCXRENAM PARM('CORPFILE' 'CORPFIL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPFILE' +
+                          '020' '1000' '1000' '20')
+             CALL       MCDLT    PARM('CORPRPTF')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CORPRPTF' +
+                          '133' '1000' '1000' '20')
+             CALL       PGM(TREQABST) PARM('A')
+/* PRINT THE REQ REPORT                                           */
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/CORPRPTF)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('001')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('Y')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+
+/*           SBMRJEJOB FILE(MCPRD/QRJEJCL) MBR(RJJCLRQS)         +*/
+/*               SSND(QRJE/RJESSN) CMD(*YES)                      */
+
+             /*** NOW OTHER REQ CREATE JOBS MAY RUN ***/
+             CALL       MCDLT    PARM('MA4ACTIV')
+ENDTHEJOB:
+             ENDPGM

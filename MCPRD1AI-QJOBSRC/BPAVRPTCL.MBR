@@ -1,0 +1,6 @@
+/***********************************************************/
+/**  THIS IS A CL PROGRAM TO DO A STRDBRDR FOR BXPAVRPT.  **/
+/***********************************************************/
+PGM
+             STRDBRDR   FILE(MCPRD1/QJOBSRC) MBR(BXPAVRPT)
+ENDPGM

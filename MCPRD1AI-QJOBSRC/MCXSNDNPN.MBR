@@ -1,0 +1,74 @@
+             PGM        /* Run No Part # Report & send to Akron */
+
+             DCL        VAR(&QRYSLT) TYPE(*CHAR) LEN(100)
+             DCL        VAR(&NEWDATE) TYPE(*CHAR) LEN(6)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(30)
+ BEGIN:
+
+ /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+
+             CHGCURLIB  CURLIB(MCPRD1)
+
+             RTVNETA    SYSNAME(&SYSTEM)
+
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Worksheet: ' *CAT +
+                          &SYSTEM)
+
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(12) OVRFLW(60) OUTQ(PD01) +
+                          USRDTA(MNFWRKNPN)
+             MONMSG     MSGID(CPF0000)
+
+ /*  GENERATE THE REPORT                                           */
+   /* DELETE "09" FILE */
+             CALL       PGM(MCDLT) PARM('MNF09FL')
+   /* DELETE VENDOR FILE */
+             CALL       PGM(MCDLT) PARM('MNFVENFL')
+   /* DELETE PART NUMBER FILE */
+             CALL       PGM(MCDLT) PARM('MNFNPN')
+
+   /* RUN QUERY TO CREATE "09" FILE */
+             RUNQRY     QRY(MCPRD/MNF09FL)
+   /* RUN QUERY TO CREATE VENDOR FILE */
+             RUNQRY     QRY(MCPRD/MNFVENFL)
+
+   /* CREATE FILE CONTAINING CODES FOR REPORT */
+             RUNSQL     REQUEST('SELECT * FROM MCFPCS3600 WHERE +
+                          CORPCDE NOT IN (SELECT DISTINCT CORPCDE +
+                          FROM MCFPCS3600 WHERE MANPARTNO > '' '') +
+                          AND MANPARTNO = '' '' ORDER BY CORPCDE') +
+                          OUTPUT(*OUTFILE) OUTFILE(*CURLIB/MNFNPN) +
+                          MEMBER(*ADD/*FIRST)
+
+   /* GRANT *PUBLIC *ALL AUTHORITY TO THE FILES JUST CREATED          */
+   /* SO THAT THEY CAN BE DELETED THE NEXT TIME THAT THIS PGM IS RUN. */
+             GRTOBJAUT  OBJ(MNF09FL) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MNFVENFL) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MNFNPN) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+
+   /* RUN THE QUERY REPORT PROGRAM.                                */
+             RUNQRY     QRY(MCPRD/MNFNPNRPTB)     /* NO PART # BY BIN RPT */
+             MONMSG     MSGID(CPF0000)
+
+ /*  SEND THE GENERATED SPOOL FILE TO AKRON60                      */
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+ /*  PRINT 2 COPIES                                                */
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+ FINI:
+
+             ENDPGM

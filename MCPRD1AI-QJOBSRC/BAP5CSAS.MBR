@@ -1,0 +1,10 @@
+             PGM /*BAP5CSAS*/
+             CHKOBJ     OBJ(*CURLIB/MANSTR01) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(EOJ))
+             CRTPF      FILE(*CURLIB/STACTIVE) RCDLEN(80)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(EOJ))
+             GRTOBJAUT  OBJ(STACTIVE) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             MONMSG     MSGID(CPF0000) EXEC(GOTO CMDLBL(EOJ))
+             CALL       BXDSTACT
+EOJ:         ENDPGM

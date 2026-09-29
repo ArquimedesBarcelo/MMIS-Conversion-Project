@@ -1,0 +1,39 @@
+            PGM
+/****************************************************************/
+/** BDKERFILE                                                  **/
+/**    THIS PROGRAM WILL HANDLE THE GENERATIONS OF MEMBERS IN  **/
+/**    RECEIVING DOCK BATCH ERROR FILE "DKERFILE".  THE OLDEST **/
+/**    GENERATION MEMBER DKERFIL2 WILL BE REMOVED IN THE MONTH **/
+/**    OF JANUARY WHEN THE YEAR IN THE MEMBER DKERFILE BECOMES **/
+/**    ONE LESS THAN THE CURRENT YEAR.  THIS PROGRAM ASSUMES   **/
+/**    THAT THE FIRST LINE IN THE MEMBER WILL ALWAYS BE OF THE **/
+/**    FORMAT "*YYMMDD".  PROGRAM BDKERFLRD MUST BE CALLED TO  **/
+/**    READ THE ERROR FILE MEMBER.                             **/
+/****************************************************************/
+
+             DCL        VAR(&CURRMONTH) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&CURRYEAR)  TYPE(*CHAR) LEN(2)
+             DCL        VAR(&ERRYEAR)   TYPE(*CHAR) LEN(2)
+
+             RTVSYSVAL  SYSVAL(QMONTH) RTNVAR(&CURRMONTH)
+             RTVSYSVAL  SYSVAL(QYEAR)  RTNVAR(&CURRYEAR)
+
+             /*** ONLY PROCESS IN THE MONTH OF JANUARY ***/
+             IF (&CURRMONTH ¬= "01") THEN(GOTO CMDLBL(EOJ))
+
+             /*** GET THE YEAR OF THE ERROR FILE ***/
+             CALL BDKERFLRD PARM(&ERRYEAR)
+
+             /*** PROCESS ONLY WHEN THE YEAR IS DIFFERENT ***/
+             IF (&ERRYEAR = &CURRYEAR) THEN(GOTO CMDLBL(EOJ))
+
+GENERATION:
+             /*** COPY NEWEST MEMBER TO OLDEST MEMBER ***/
+             CPYF       FROMFILE(DKERFILE) TOFILE(DKERFILE) +
+                          FROMMBR(DKERFILE) TOMBR(DKERFIL2) +
+                          MBROPT(*REPLACE)
+             /*** CLEAR NEWEST MEMBER ***/
+             CLRPFM     FILE(DKERFILE) MBR(DKERFILE)
+
+EOJ:
+             ENDPGM

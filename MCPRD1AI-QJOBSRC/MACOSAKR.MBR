@@ -1,0 +1,47 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+   /**************************************************************/
+   /*** MACOSAKR - THIS PROCEDURE RUN THE 3 MACOS MONTHLY      ***/
+   /***            QUERY REPORTS, AND SENDS THEM TO AKRON60.   ***/
+   /**************************************************************/
+
+   /* ESTABLISH THE CURLIB.  FILES WILL BE CREATED IN THIS LIBRARY.  */
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /* ESTABLISH THE PROPER OVERRIDES TO DIRECT THE QUERY REPORTS AS  */
+   /* DESIRED.                                                       */
+   /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('MACOS: ' *CAT &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+   /* OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE AND OUTQ     */
+   /*   LENGTH X WIDTH                                               */
+   /*       11 X 14 PAPER  - PAGESIZE(66 132) LPI(6) CPI(10)         */
+   /*      8.5 X 14 PAPER  - PAGESIZE(68 132) LPI(8) CPI(10)         */
+   /*       11 X 8.5 PAPER - PAGESIZE(66 132) LPI(6) CPI(16.7)       */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(10) OVRFLW(60) OUTQ(*JOB) HOLD(*YES) +
+                          SAVE(*YES) USRDTA(MACOSAKR)
+             MONMSG     MSGID(CPF0000)
+
+   /* RUN THE QUERY REPORT PROGRAMS, AND SEND THEM TO AKRON60.       */
+             RUNQRY     QRY(MACOSQERR) /* ERROR REPORT */
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(MACOSQSUM) /* SUMMARY REPORT */
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(MACOSQDTL) /* OPTIONAL DETAIL REPORT */
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+
+             ENDPGM

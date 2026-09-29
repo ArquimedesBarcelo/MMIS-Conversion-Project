@@ -1,0 +1,55 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+   /**************************************************************/
+   /*** OEMWRKSH                                               ***/
+   /***    - THIS JOB WILL RUN THE OEM WORKSHEET (BY BIN       ***/
+   /***      LOCATION) REPORT.                                 ***/
+   /***                                                        ***/
+   /**************************************************************/
+
+   /* ESTABLISH THE CURLIB.  FILES WILL BE CREATED IN THIS LIBRARY.  */
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /* DELETE "09" FILE */
+             CALL       PGM(MCDLT) PARM('MNF09FL')
+   /* DELETE VENDOR FILE */
+             CALL       PGM(MCDLT) PARM('MNFVENFL')
+
+   /* RUN QUERY TO CREATE "09" FILE */
+             RUNQRY     QRY(MCPRD/MNF09FL)
+
+   /* RUN QUERY TO CREATE VENDOR FILE */
+             RUNQRY     QRY(MCPRD/MNFVENFL)
+
+   /* GRANT *PUBLIC *ALL AUTHORITY TO THE FILES JUST CREATED          */
+   /* SO THAT THEY CAN BE DELETED THE NEXT TIME THAT THIS PGM IS RUN. */
+             GRTOBJAUT  OBJ(MNF09FL) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MNFVENFL) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+
+   /* ESTABLISH THE PROPER OVERRIDES TO DIRECT THE QUERY REPORTS AS  */
+   /* DESIRED.                                                       */
+   /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('OEM: ' *CAT +
+                          &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+   /* OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE AND OUTQ     */
+   /*   LENGTH X WIDTH                                               */
+   /*       11 X 14 PAPER  - PAGESIZE(66 132) LPI(6) CPI(10)         */
+   /*      8.5 X 14 PAPER  - PAGESIZE(68 132) LPI(8) CPI(10)         */
+   /*       11 X 8.5 PAPER - PAGESIZE(66 132) LPI(6) CPI(16.7)       */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(10) OVRFLW(60) SPOOL(*YES) +
+                          OUTQ(*LIBL/QQRX) HOLD(*YES) USRDTA(OEMWRKSHB)
+             MONMSG     MSGID(CPF0000)
+
+   /* RUN THE QUERY REPORT PROGRAM.                                */
+             RUNQRY     QRY(MCPRD/OEMWRKRPTB) /* OEM WORKSHEET BY +
+                          BIN RPT */
+
+             ENDPGM

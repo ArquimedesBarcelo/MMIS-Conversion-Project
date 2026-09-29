@@ -1,0 +1,4 @@
+             PGM               /* CLRCVTRK */
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT06)
+             CALL       PGM(*LIBL/TRCVTRKS)
+             ENDPGM

@@ -1,0 +1,14 @@
+//BCHJOB  JOB(BXFINCLS) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+    RUNSQL  REQUEST('UPDATE mcqa1/mcfpcs0200 a +
+            SET a.stravgcost = (SELECT b.stravgcost FROM +
+                                mcprd1/mcfpcs0200 b +
+                                WHERE a.corpcde = b.corpcde) +
+            WHERE (a.corpcde = (SELECT b.corpcde FROM mcprd1/mcfpcs0200 b +
+                                WHERE a.corpcde = b.corpcde)) +
+            AND (a.stravgcost <> (SELECT b.stravgcost FROM +
+                                  mcprd1/mcfpcs0200 b +
+                                  WHERE a.corpcde = b.corpcde))')
+/*##################################################################*/
+//ENDBCHJOB

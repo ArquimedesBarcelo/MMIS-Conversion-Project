@@ -1,0 +1,29 @@
+//BCHJOB  JOB(B7PODELT) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      C S I S  JOB  'B7PODELT'                                ##*/
+/*## THIS IS A WHOLESALE DELETE OF POS BASED ON PO DATE.  BELOW   ##*/
+/*## ARE THE ACCEPT VALUES NEEDED TO RUN THIS PROGRAM             ##*/
+/*## THE PROGRAM 'FOT7PODELT' DOES ALL THE FILE OPENS             ##*/
+/*## THE PROGRAM 'FCT7PODELT' DOES ALL THE FILE CLOES AFTER       ##*/
+/*## THE ACTUAL DELETE PROGRAM 'T7PODELT' IS FINISHED             ##*/
+/*##################################################################*/
+       CALL FOT7PODELT
+/*********************************************************************/
+/*** CALL AUTOMATIC DELETE PROGRAM 'T7PODELT' (COBOL)              ***/
+/***                                                               ***/
+/*** ENTER THE FOLLOWING ACCEPT VALUES                             ***/
+/***   1. DELETION DATE (MMDDYY)                                   ***/
+/***   2. COMPANY CODE                                             ***/
+/***   3. CONTINUE (Y OR N)                                        ***/
+/***                                                               ***/
+/*********************************************************************/
+         CALL T7PODELT
+010190
+285
+Y
+/*********************************************************************/
+/*** CALL 'FCT7PDELT' TO CLOSE ALL THE FILES OPENED BY 'FOT7PODELT'***/
+/*********************************************************************/
+         CALL FCT7PODELT
+//ENDBCHJOB

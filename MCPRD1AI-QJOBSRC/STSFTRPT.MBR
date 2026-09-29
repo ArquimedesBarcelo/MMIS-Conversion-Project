@@ -1,0 +1,4 @@
+             PGM /*STSFTRPT*/
+             OVRPRTF    FILE(QPRINT) TOFILE(*LIBL/MCPRT30)
+             CALL       PGM(MCPRD/TAUTORPT)
+EOJ:         ENDPGM

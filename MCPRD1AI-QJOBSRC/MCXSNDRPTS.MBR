@@ -1,0 +1,96 @@
+             PGM        /* Create R3 query reports and send to Akron    */
+
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(30)
+ BEGIN:
+
+ /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+
+             RTVNETA    SYSNAME(&SYSTEM)
+
+ /*          CHGVAR     VAR(&PRINTTEXT) VALUE('CSIS/MMIS Error Log: + */
+ /*                       ' *CAT &SYSTEM)                             */
+
+ /*          CHGJOB     PRTTXT(&PRINTTEXT)                            */
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 195) LPI(6) +
+                          CPI(15) OVRFLW(60) OUTQ(MCMGR) +
+                          USRDTA(FAYR3RPTS)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO DESCRIPTION                     */
+             DLTF       FILE(MCPRD1/DDESC09)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(DDESC09)
+             MONMSG     MSGID(CPF0000)
+
+             DLTF       FILE(MCPRD1/NODESCFL)
+             MONMSG     MSGID(CPF0000)
+             RUNQRY     QRY(NODESC)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(NODESCRPT)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO PART NUMBER                     */
+
+             RUNQRY     QRY(MSGMNFPN)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* MREQ REPORT                                   */
+
+             RUNQRY     QRY(MREQ6MOS)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO AVERAGE COST                    */
+
+             RUNQRY     QRY(AVGCOST0)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO AVERAGE COST & ONHAND = 0       */
+
+             RUNQRY     QRY(AVGCOST0B)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* DUPLICATE CODES                               */
+
+             RUNQRY     QRY(DUPCODES)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+/* UNINITIALIZED CODES                           */
+
+             RUNQRY     QRY(UNINITMP1)
+             MONMSG     MSGID(CPF0000)
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+ FINI:
+             ENDPGM

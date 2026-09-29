@@ -1,0 +1,51 @@
+             PGM
+             DCL VAR(&DAY)     TYPE(*CHAR) LEN(4)
+             DCL VAR(&FLNAME)  TYPE(*CHAR) LEN(13)
+             DCL VAR(&DIRNAME) TYPE(*CHAR) LEN(31)
+             DCL VAR(&LNKNAME) TYPE(*CHAR) LEN(46)
+
+/********************************************************************/
+/* BRPTPROC                                                         */
+/*    THIS JOB WILL CALL THE PROGRAM TBLOWRPT TO PRINT THE DAILY    */
+/*    BLOWUP REPORT.                                                */
+/********************************************************************/
+
+             OVRDBF     FILE(DLYBLUP) TOFILE(MCPRD1/DLYBLUP) MBR(DLYBLUP1)
+             OVRDBF     FILE(ROUTESLIP) TOFILE(MCPRD1/ROUTESLIP) MBR(ROUTESLIP)
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT21)
+             CALL       PGM(MCUTIL/TBLOWRPT) PARM(N)
+
+/********************************************************************/
+/*    RETREIVE DAY OF WEEK VALUE AND CONCATENATE WITH FILE NAMES    */
+/********************************************************************/
+             RTVSYSVAL  SYSVAL(QDAYOFWEEK) RTNVAR(&DAY)
+             CHGVAR     VAR(&DAY) VALUE(%SST(&DAY 2 3))
+             CHGVAR     VAR(&FLNAME) VALUE('blowup' *CAT &DAY *TCAT +
+                          '.HTM')
+             CHGVAR     VAR(&DIRNAME) VALUE('/csismmis/reports/' *CAT &FLNAME)
+             CHGVAR     VAR(&LNKNAME) VALUE('HTTP://akron60/' *CAT +
+                          &DIRNAME)
+
+/********************************************************************/
+/*    CONVERT SPOOL FILE TO STANDARD HTML DOCUMENT ON WEB SERVER    */
+/********************************************************************/
+             CVTSPLSTMF FROMFILE(MCPRT) TOSTMF(&FLNAME) +
+                          TODIR('/csismmis/reports') TOFMT(*HTML) +
+                          STMFOPT(*REPLACE) TITLE('CSIS Blowup +
+                          Report') STMFCODPAG(*STMF)
+
+             CHGAUT     OBJ(&DIRNAME) USER(QTMHHTTP PD01) DTAAUT(*RX)
+
+/********************************************************************/
+/*    SEND E-MAIL WITH LINK TO NEW HTML DOCUMENT                    */
+/*       9/21/2005  REMOVE D RAUCH USER-ID                          */
+/*       9/29/2005  ADD KAREN RAUTENBACH AND FREDERIC HENRY (EUROPE)*/
+/*       3/07/2007  REMOVE BILL FONAGY & CATHY YODER                */
+/*       1/03/2008  REMOVE KAREN & FREDERIC, ADD MARTY (N24MJB1)    */
+/********************************************************************/
+             SNDDST     TYPE(*LMSG) TOUSRID((A334884 GTRLAN) +
+                                            (N24MJB1 GTRLAN)) +
+                        DSTD('Blowup Report') +
+                        LONGMSG(&LNKNAME) +
+                        SUBJECT('Daily Blowup Report LINK')
+             ENDPGM

@@ -1,0 +1,16 @@
+//BCHJOB  JOB(BINVDIAG) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+       /* * * * * * * * * * * * * * * * * * * * * * * * * * */
+       /* The answers below go to the following questions   */
+       /* presented by the program TINVDIAG:                */
+       /*  1. Check DINVRCD? (Y/N)                          */
+       /*  2. Check DINVITM? (Y/N)                          */
+       /*  3. Check DINVACCT? (Y/N)                         */
+       /*  4. Delete bad records? (Y/N)                     */
+       /* * * * * * * * * * * * * * * * * * * * * * * * * * */
+CALL PGM(TINVDIAG)
+Y
+Y
+Y
+N
+//ENDBCHJOB

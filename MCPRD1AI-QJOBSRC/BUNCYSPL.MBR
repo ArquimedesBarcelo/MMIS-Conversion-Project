@@ -1,0 +1,50 @@
+             PGM
+/*#################################################################*/
+/*##                   JOB 'BUNCYSPL'                            ##*/
+/*##   THIS JOB ABSTRACTS SELECTED DATA FROM THE CSIS MREQ       ##*/
+/*##   AND DREQITM FILES AND WRITES IT TO A 'REQSFI01' FILE.     ##*/
+/*#################################################################*/
+
+/*#################################################################*/
+/*##  SET THE CURRENT LIBRARY TO MCPRD1                          ##*/
+/*#################################################################*/
+             CHGCURLIB  CURLIB(MCPRD1)
+
+/*#################################################################*/
+/*##  CHECK FOR EXISTENCE OF EACH GENERATION.  IF IT IS NOT      ##*/
+/*##  THERE, CREATE IT.                                          ##*/
+/*#################################################################*/
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI10' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI09' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI08' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI07' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI06' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI05' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI04' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI03' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI02' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI01' '080' '5000' '1000' '99')
+
+/*#################################################################*/
+/*## NOW RENAME GENERATIONS OF THE REQSFI01 FILE, AND BUILD A    ##*/
+/*## NEW ONE.                                                    ##*/
+/*#################################################################*/
+   CALL MCDLT    PARM('REQSFI10')
+   CALL MCXRENAM PARM('REQSFI09' 'REQSFI10')
+   CALL MCXRENAM PARM('REQSFI08' 'REQSFI09')
+   CALL MCXRENAM PARM('REQSFI07' 'REQSFI08')
+   CALL MCXRENAM PARM('REQSFI06' 'REQSFI07')
+   CALL MCXRENAM PARM('REQSFI05' 'REQSFI06')
+   CALL MCXRENAM PARM('REQSFI04' 'REQSFI05')
+   CALL MCXRENAM PARM('REQSFI03' 'REQSFI04')
+   CALL MCXRENAM PARM('REQSFI02' 'REQSFI03')
+   CALL MCXRENAM PARM('REQSFI01' 'REQSFI02')
+
+   CALL MCXCRTFIL PARM('*CURLIB' 'REQSFI01' '080' '5000' '1000' '99')
+
+/*#################################################################*/
+/*##  CALL THE COBOL PROGRAM TUNCYSPL WHICH WILL WRITE CURRENT   ##*/
+/*##  MONTH TRANSACTIONS TO FILE REQSFI01.                       ##*/
+/*#################################################################*/
+             CALL       PGM(TUNCYSPL)
+             ENDPGM

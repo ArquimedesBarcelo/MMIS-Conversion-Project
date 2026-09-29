@@ -1,0 +1,27 @@
+             PGM
+/********************************************************************/
+/*** BBRPT                                                          */
+/***     THIS JOB IS SUBMITTED WHENEVER DATA IS SENT TO THE FORMS   */
+/***     CONTROL TABLE ENTRY BRPT.  THE DATA WILL BE PLACED IN THE  */
+/***     FILE(DLYBLUP) MBR(DLYBLUP) TO BE PROCESSED WHEN THE JOB    */
+/***     BRPTWRKPFM IS SUBMITTED.                                   */
+/********************************************************************/
+
+             DCL        VAR(&INFILE) TYPE(*CHAR) LEN(30)
+ALLOCATIT:
+             ALCOBJ     OBJ((MCPRD1/DLYBLUP *FILE *EXCL DLYBLUP)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+             CALL PGM(QMRSWTR) PARM(&INFILE)
+             DLCOBJ     OBJ((MCPRD1/DLYBLUP *FILE *EXCL DLYBLUP))
+
+             SBMJOB     CMD(CALL PGM(BRPTWRKPFM)) JOB(BRPTWRKPFM) +
+                          JOBD(*LIBL/MCMGR) JOBQ(QBATCH) +
+                          PRTDEV(*JOBD) OUTQ(*JOBD) USER(*JOBD) +
+                          PRTTXT(*JOBD) CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+             ENDPGM

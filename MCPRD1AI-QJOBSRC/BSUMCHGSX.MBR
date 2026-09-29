@@ -1,0 +1,15 @@
+//BCHJOB  JOB(BSUMCHGS) JOBD(*LIBL/MCMGR) JOBQ(HLBATCH) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##           C S A S  JOB 'BSUMCHGS'  (NO PRINT)                ##*/
+/*##################################################################*/
+             CALL       MCDLT    PARM('VOCHRFLE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFLE' +
+                          '080' '2000' '1000' '20')
+             CALL       MCDLT    PARM('VOCHRFL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFL2' +
+                          '080' '2000' '1000' '20')
+             CALL       PGM(TSUMCHGS)
+1
+             DLTSPLF    FILE(MCPRT) SPLNBR(*LAST)
+//ENDBCHJOB

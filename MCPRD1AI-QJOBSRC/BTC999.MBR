@@ -1,0 +1,49 @@
+             /********************************************************/
+             /*** TC999 STANDALONE CUTOFF FOR CSIS.                ***/
+             /***   CREATE ABSTFILE FOR TC999 TRANSACTIONS FOR     ***/
+             /***   ALL CORPORATE CODES AND SEND THE ABSTFILE.     ***/
+             /********************************************************/
+             PGM
+             DCL  VAR(&BASE) TYPE(*CHAR) LEN(10)
+             DCL  VAR(&STATUS) TYPE(*CHAR) LEN(24)
+             DCL  VAR(&TC999PARMS) TYPE(*CHAR) LEN(30)
+             DCL  VAR(&MSG) TYPE(*CHAR) LEN(60)
+             DCL  VAR(&MSGFIELDS) TYPE(*CHAR) LEN(110)
+             DCL        VAR(&S)        TYPE(*CHAR) LEN(1)
+
+             /*** RUN ONLY IF DO999ALL FLAG FILE EXISTS ***/
+             CHKOBJ     OBJ(DO999ALL) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF9800) EXEC(GOTO CMDLBL(ENDOFJOB))
+
+             /*** THIS FILE MAKES SURE CUTOFF ISNT ALREADY RUNNING ***/
+             CRTPF      FILE(MCFCUTRUN) RCDLEN(1) SIZE(1 1 1)
+             GRTOBJAUT  OBJ(*CURLIB/MCFCUTRUN) OBJTYPE(*FILE) +
+                          USER(*PUBLIC) AUT(*ALL)
+
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'ABSTFILE' +
+                          '080' '1000' '1000' '90')
+
+             /*** THIS PROGRAM APPENDS TC999 TRANSACTIONS TO ***/
+             /*** THE END OF ABSTFILE FILE.                  ***/
+             CALL CTC999 PARM(&BASE &STATUS &TC999PARMS &MSG &MSGFIELDS)
+             MONMSG MSGID(CPF0000) EXEC(DO)
+                 CALL MCXABEND
+                 GOTO ENDOFJOB
+             ENDDO
+
+   /*** KEEP 15 GENERATIONS OF ABSTFILE ***/
+CALL TGENFILE PARM('ABSTFILE' 'ABSTFIL' '15' +
+                          'MCPRD1' '0080' '01000' '01000' '30' &S)
+/******************************************************************/
+/*** DELETE FILE MCFCUTRUN TO INDICATE THAT THE SIGNIFICANT     ***/
+/*** PORTIONS OF BCUTOFF RAN SUCCESSFULLY.                      ***/
+/******************************************************************/
+             DLTF       FILE(MCFCUTRUN)
+/******************************************************************/
+/*** WE HAVE TO SUBMIT RJEJOB AND USE ABSTFIL2 FOR SENDING AFTER***/
+/*** THE RENAMES, OTHERWISE RJE WOULD HAVE CONTROL OF ABSTFILE. ***/
+/******************************************************************/
+/**          SBMRJEJOB  FILE(MCPRD/QRJEJCL) MBR(RJJCL) +
+                          SSND(QRJE/RJESSN) CMD(*YES)     **/
+   ENDOFJOB:
+             ENDPGM

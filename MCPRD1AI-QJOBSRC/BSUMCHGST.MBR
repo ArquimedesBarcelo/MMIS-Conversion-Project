@@ -1,0 +1,17 @@
+//BCHJOB  JOB(BSUMCHGST) JOBD(*LIBL/MCMGRT) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##           C S A S  JOB 'BSUMCHGS'        (SR18)              ##*/
+/*## THIS JOB CREATES A STORES SUMMARY REPORT FOR CSAS.           ##*/
+/*##################################################################*/
+             CHGCURLIB  T881S03
+             CALL       MCDLT    PARM('VOCHRFLE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFLE' +
+                          '080' '2000' '1000' '20')
+             CALL       MCDLT    PARM('VOCHRFL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFL2' +
+                          '080' '2000' '1000' '20')
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT12)
+             CALL       PGM(MCPRD/TSUMCHGS)
+1
+//ENDBCHJOB

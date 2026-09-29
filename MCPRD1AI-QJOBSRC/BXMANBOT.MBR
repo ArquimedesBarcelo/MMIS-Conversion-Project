@@ -1,0 +1,19 @@
+             CALL       PGM(CLMANBOT)
+/*********************************************************************/
+/***  SEND MESSAGE TO ACCOUNTS PAYABLE INDICATING THAT 'AP3'       ***/
+/***  HAS FINISHED.  THIS WILL BE PLANT DEPENDENT BY USER ID       ***/
+/***  SO THE DEFAULT WILL BE *SYSOPR USERID WHICH THE PLANT CAN    ***/
+/***  MODIFY.                                                      ***/
+/*********************************************************************/
+SNDMSG     MSG('The AP3 manifest job has ended successfully.  +
+             Proceeding to do an  AP4  manifest send.') TOUSR(T881S26)
+SNDMSG     MSG('The AP3 manifest job has ended successfully.  +
+             Proceeding to do an  AP4  manifest send.') TOUSR(T001575)
+/*********************************************************************/
+/***  SEND MANIFEST DATA TO ACCOUNTS PAYABLE VIA RJE.  THIS IS     ***/
+/***  DONE VIA THE JOB 'BAPMANSD' USING THE 'STRDBRDR' COMMAND     ***/
+/***  IF THIS SEND FAILS FOR SOME REASON THE USER CAN DO AN 'AP4'  ***/
+/***  OF THEIR OWN MENU                                            ***/
+/*********************************************************************/
+STRDBRDR   FILE(*CURLIB/QJOBSRC) MBR(BAPMANSD) RDR(BAPMANSD)
+//ENDBCHJOB

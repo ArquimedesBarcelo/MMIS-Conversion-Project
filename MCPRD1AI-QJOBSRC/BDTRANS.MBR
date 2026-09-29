@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BDTRANS) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##      C S A S  JOB  'BDTRANS'                                 ##*/
+/*## UTILITY JOB TO SET ALL NUMERIC DTRANS FIELDS WHICH CONTAIN   ##*/
+/*## NON-NUMERIC DATA TO ZERO.                                    ##*/
+/*##################################################################*/
+             CALL       PGM(TDTRANS)
+//ENDBCHJOB

@@ -1,0 +1,12 @@
+   PGM /*BXMOSTAT*/
+   DCL VAR(&S) TYPE(*CHAR) LEN(2)
+   CLRPFM     FILE(MCFPMMHIST)
+   /********************************************************/
+   /*** OVERRIDE TO DESIRED PRINTER FOR OUTPUT REPORT    ***/
+   OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99) SHARE(*YES)
+   /********************************************************/
+   CALL TMODSTAT
+   SBMRJEJOB FILE(MCPRD/QRJEJCL) MBR(RJJCLWO) SSND(QRJE/RJESSN) +
+      CMD(*YES)
+   CALL STMMDELETE
+   ENDPGM

@@ -1,0 +1,37 @@
+   PGM
+             SNDNETF    FILE(A257947) TOUSRID((A257947 DANVIL3) +
+                          (A257947 GADSDEN6) (A257947 LAWTON6) +
+                          (A257947 NAPANE2) (A257947 TOPEKA) +
+                          (A257947 UNCITY1) (A257947 VALLEYF4) +
+                          (A257947 FAYETT1) (A257947 FREEPOR1) +
+                          (A257947 TYLER1) (A257947 ASHEBORO) +
+                          (A257947 DECATUR) (A257947 SPARTAN1))
+
+/*           SNDNETF    FILE(MCPRDB/QJOBSRC) TOUSRID((A257947 +
+                          DANVIL3) (A257947 GADSDEN6) (A257947 +
+                          LAWTON6) (A257947 NAPANE2) (A257947 +
+                          TOPEKA) (A257947 UNCITY1) (A257947 +
+                          VALLEYF4) (A257947 FAYETT1) (A257947 +
+                          FREEPOR1) (A257947 TYLER1) (A257947 +
+                          ASHEBORO) (A257947 DECATUR) (A257947 +
+                          SPARTAN1)) MBR(MCXSNDNPN)   */
+
+/*           SNDNETF    FILE(MCPRDB/QJOBSRC) TOUSRID((A257947 +
+                          DANVIL3) (A257947 GADSDEN6) (A257947 +
+                          LAWTON6) (A257947 NAPANE2) (A257947 +
+                          TOPEKA) (A257947 UNCITY1) (A257947 +
+                          VALLEYF4) (A257947 FAYETT1) (A257947 +
+                          FREEPOR1) (A257947 TYLER1) (A257947 +
+                          ASHEBORO) (A257947 DECATUR) (A257947 +
+                          SPARTAN1)) MBR(OEMWRKSHB)       */
+
+/*           SNDNETF    FILE(MCPRDB/QJOBSRC) TOUSRID((A257947 +
+                          DANVIL3) (A257947 GADSDEN6) (A257947 +
+                          LAWTON6) (A257947 NAPANE2) (A257947 +
+                          TOPEKA) (A257947 UNCITY1) (A257947 +
+                          VALLEYF4) (A257947 FAYETT1) (A257947 +
+                          FREEPOR1) (A257947 TYLER1) (A257947 +
+                          ASHEBORO) (A257947 DECATUR) (A257947 +
+                          SPARTAN1)) MBR(OEMWRKSHM)  */
+
+             ENDPGM

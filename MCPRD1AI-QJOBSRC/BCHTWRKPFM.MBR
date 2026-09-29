@@ -1,0 +1,35 @@
+             PGM
+/********************************************************************/
+/* BCHTWRKPFM                                                       */
+/*     THIS JOB IS SUBMITTED FROM THE JOB BCHAT WHICH IS RUN WHEN   */
+/*     DATA IS SENT TO THE FORMS CONTROL TABLE ENTRY 'CHAT'.  THIS  */
+/*     JOB WILL RENAME THE MEMBERS IN THE FILE CHATNO TO MAINTAIN   */
+/*     THE GENERATIONS OF DATA.  THE JOB BCHATPROC WILL THEN BE     */
+/*     SUBMITTED TO UPDATE THE MCFPCS5500 FILE WITH THE DATA THAT   */
+/*     WAS SENT TO THE FORM CHAT.                                   */
+/********************************************************************/
+
+             RMVM   FILE(CHATNO)  MBR(CHATNO05)
+             MONMSG MSGID(CPF0000)
+
+             RNMM   FILE(CHATNO)  MBR(CHATNO04)   NEWMBR(CHATNO05)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(CHATNO)  MBR(CHATNO03)   NEWMBR(CHATNO04)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(CHATNO)  MBR(CHATNO02)   NEWMBR(CHATNO03)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(CHATNO)  MBR(CHATNO01)   NEWMBR(CHATNO02)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(CHATNO) TOFILE(CHATNO) +
+                          FROMMBR(CHATNO) TOMBR(CHATNO01) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+
+             CLRPFM     FILE(CHATNO) MBR(CHATNO)
+
+             SBMJOB     CMD(CALL PGM(BCHATPROC)) JOB(BCHATPROC) +
+                          JOBD(*LIBL/MCMGR) JOBQ(HBATCH) +
+                          PRTDEV(*JOBD) OUTQ(*JOBD) USER(*JOBD) +
+                          PRTTXT(*JOBD) CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+
+             ENDPGM

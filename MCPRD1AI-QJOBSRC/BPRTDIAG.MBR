@@ -1,0 +1,16 @@
+   PGM
+
+      /*** PRINT SUMMARY REPORT ***/
+             OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DIAGRPT)
+      /*** PRINT NUM ***/
+             CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('011')
+      /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+             CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+      /*** NUMBER OF COPIES ***/
+             CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+      /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+             CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+      /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+             CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('N')
+      CALL TPRTRPT
+             ENDPGM

@@ -1,0 +1,76 @@
+             /********************************************************/
+             /*** D A I L Y   C U T O F F   J O B                  ***/
+             /***   DAILY CUTOFF FOR CSIS.  ALL TRANSACTIONS FOR   ***/
+             /***   THE DAY ARE WRITTEN FROM THE STORES DATABASE   ***/
+             /***   TO THE FLAT FILE "ABSTFILE"                    ***/
+             /********************************************************/
+             PGM
+             DCL        VAR(&NEWMONTH) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&S)        TYPE(*CHAR) LEN(1)
+/*** THIS FILE MAKES SURE CUTOFF ISNT ALREADY RUNNING              ***/
+/***         CHGCURLIB  T881S03  ***/
+             CHGCURLIB  MCPRD1
+             CRTPF      FILE(MCFCUTRUN) RCDLEN(1) SIZE(1 1 1)
+             GRTOBJAUT  OBJ(*CURLIB/MCFCUTRUN) OBJTYPE(*FILE) +
+                          USER(*PUBLIC) AUT(*ALL)
+
+/*** COPY DDAILY TC JUST IN CASE OF DISASTER                       ***/
+   CALL CCRTFILE PARM('*CURLIB' 'SAVEABS1' '80' '1000' '1000' '99' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'SAVEABS2' '80' '1000' '1000' '99' &S)
+   CALL MCDLT PARM('SAVEABS2')
+   CALL MCXRENAM PARM('SAVEABS1' 'SAVEABS2')
+   CALL CCRTFILE PARM('*CURLIB' 'SAVEABS1' '80' '1000' '1000' '99' &S)
+             CPYF       FROMFILE(MCFPCS1600) +
+                          TOFILE(*CURLIB/SAVEABS1) MBROPT(*ADD) +
+                          FMTOPT(*NOCHK)
+
+/***         CALL PGM(TUSEUPDT)    ***/
+             CALL MCDLT PARM('USYESFIL')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'USYESFIL' +
+                          '018' '1000' '1000' '10')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'ABSTFILE' +
+                          '080' '1000' '1000' '90')
+             /* THE MONMSG AFTER THIS RUN PREVENTS THE OPERATOR */
+             /* FROM DOING A RETRY IF A BLOWUP, THUS WIPING OUT */
+             /* ALL THE TRANSACTION DATA (SINCE DDAILYTC IS CLEARED)*/
+             CALL TCDLYABS
+             MONMSG MSGID(CPF0000) EXEC(DO)
+                 CALL MCXABEND
+                 GOTO ENDOFJOB
+             ENDDO
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT12)
+             RTVDTAARA  DTAARA(*LDA (282 1)) RTNVAR(&NEWMONTH)
+             IF (&NEWMONTH = 'Y') THEN(DO)
+                 CALL TUSAVGUP
+             ENDDO
+/*** KEEP 15 GENERATIONS OF ABSTFILE                            ***/
+             CALL TGENFILE PARM('ABSTFILE' 'ABSTFIL' '15' +
+                      'MCPRD1' '0080' '01000' '01000' '30' &S)
+/******************************************************************/
+/*** DELETE FILE MCFCUTRUN TO INDICATE THAT THE SIGNIFICANT     ***/
+/*** PORTIONS OF BCUTOFF RAN SUCCESSFULLY.                      ***/
+/******************************************************************/
+             DLTF       FILE(MCFCUTRUN)
+/******************************************************************/
+/*** WE HAVE TO SUBMIT RJEJOB AND USE ABSTFIL2 FOR SENDING AFTER***/
+/*** THE RENAMES, OTHERWISE RJE WOULD HAVE CONTROL OF ABSTFILE. ***/
+/******************************************************************/
+/***         SBMRJEJOB  FILE(MCPRD/QRJEJCL) MBR(RJJCL) +        ***/
+/***                      SSND(QRJE/RJESSN) CMD(*YES)           ***/
+/******************************************************************/
+/*** UPDATE CSAS DB 'CSACCT' BY LAUNCHING 'BXDLYTRN'.           ***/
+/*** IF YOU ARE NOT USING CSAS, COMMENT OUT THIS                ***/
+/*** COMMAND.                                                   ***/
+/******************************************************************/
+/*** STRDBRDR   FILE(QJOBSRC) MBR(BXDLYTRNT)                    ***/
+/***                                                            ***/
+/******************************************************************/
+/*** START  'BINVGEN'. THIS JOB IS FOR INVOICELESS              ***/
+/*** PAYMENTS.  IT READS ABSTFIL2 AND GENERATES                 ***/
+/*** INVOICES BASED ON TODAY'S RECEIVING SLIPS.                 ***/
+/******************************************************************/
+/***         SBMJOB     JOB(BINVGEN) JOBD(MCMGR) USER(*JOBD) +  ***/
+/***                      RQSDTA('CALL BINVGEN')                ***/
+
+   ENDOFJOB:
+             ENDPGM

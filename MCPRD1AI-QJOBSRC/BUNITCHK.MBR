@@ -1,0 +1,20 @@
+//BCHJOB  JOB(BUNITCHK) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##         C S A S  JOB  'BUNITCHK'    (SR16)                  ##*/
+/*## THIS JOB CHECKS FOR ONHAND DIFFERENCES BETWEEN CSIS AND     ##*/
+/*## CSAS CODES.                                                 ##*/
+/*#################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CMDCALL:
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TUNITCHK)
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+//ENDBCHJOB

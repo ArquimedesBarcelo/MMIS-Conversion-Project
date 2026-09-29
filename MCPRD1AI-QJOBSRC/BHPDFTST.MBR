@@ -1,0 +1,16 @@
+             PGM
+ALLOCATIT:
+             ALCOBJ     OBJ((MCPRD1/INVDUTY1 *FILE *EXCL *FIRST)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+             DLCOBJ     OBJ((MCPRD1/INVDUTY1 *FILE *EXCL *FIRST))
+
+             SBMJOB     CMD(CALL PGM(MCPRD1/BDUTYLOD)) JOB(BDUTYLOD) +
+                          JOBD(*LIBL/MCMGR) JOBQ(HBATCH) +
+                          PRTDEV(*JOBD) OUTQ(*JOBD) USER(*JOBD) +
+                          PRTTXT(*JOBD) CURLIB(*USRPRF) INLLIBL(*JOBD)
+             ENDPGM

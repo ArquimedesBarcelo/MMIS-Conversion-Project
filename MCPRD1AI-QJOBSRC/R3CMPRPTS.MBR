@@ -1,0 +1,34 @@
+             PGM
+
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(30)
+ BEGIN:
+
+ /*  CHANGE THE JOB TO PRINT THE PLANT NAME ON THE REPORT          */
+
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Fayetteville +
+                          Comparison Reports')
+
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 195) LPI(6) +
+                          CPI(15) OVRFLW(60) OUTQ(PD01) +
+                          USRDTA(R3CMPRPT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  GENERATE FAYETTEVILLE'S REPORTS                               */
+
+             RUNQRY     QRY(R3MSGCSIS)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(R3MSGPRAPS)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(R3UNITCOST)
+             MONMSG     MSGID(CPF0000)
+
+             RUNQRY     QRY(R3ONHAND)
+             MONMSG     MSGID(CPF0000)
+
+             ENDPGM

@@ -1,0 +1,147 @@
+   PGM
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&JCWVALUE) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&RECORDS) TYPE(*DEC) LEN(10 0)
+
+             CHGCURLIB  CURLIB(MCPRD1)
+
+/*** ALLOCATE THE FILE TO PREVENT A COLLISION WITH RJE, WHICH      */
+/*** MIGHT BE SENDING DATA INTO DOCKFILE AT THE TIME THIS JOB RUNS */
+ALLOCATIT:
+             ALCOBJ     OBJ((*CURLIB/DOCKFILE *FILE *EXCL DOCKFILE)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+ /*** RETRIEVE NUMBER OF RECORDS IN FILE.  IF ZERO THEN DATA HAS    ***/
+ /*** BEEN PROCESSED ALREADY BY A PREVIOUS JOB.  SIMPLY END THE JOB ***/
+              RTVMBRD    FILE(*CURLIB/DOCKFILE) MBR(DOCKFILE) +
+                           NBRCURRCD(&RECORDS)
+              IF COND(&RECORDS *EQ 0) THEN(DO)
+                 DLCOBJ     OBJ((*CURLIB/DOCKFILE *FILE *EXCL DOCKFILE))
+                 GOTO FINI
+              ENDDO
+
+
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE DOCKFILS MEMBERS   ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL8) TOMBR(DOCKFIL9) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL7) TOMBR(DOCKFIL8) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL6) TOMBR(DOCKFIL7) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL5) TOMBR(DOCKFIL6) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL4) TOMBR(DOCKFIL5) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL3) TOMBR(DOCKFIL4) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL2) TOMBR(DOCKFIL3) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFIL1) TOMBR(DOCKFIL2) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CPYF       FROMFILE(*CURLIB/DOCKFILE) +
+                          TOFILE(*CURLIB/DOCKFILE) +
+                          FROMMBR(DOCKFILE) TOMBR(DOCKFIL1) +
+                          MBROPT(*REPLACE)
+             MONMSG MSGID(CPF0000)
+             CLRPFM     FILE(*CURLIB/DOCKFILE) MBR(DOCKFILE)
+             MONMSG MSGID(CPF0000)
+
+             CHGDTAARA  DTAARA(*LDA (285 1)) VALUE('N')
+             OVRDBF     FILE(DOCKFILE) TOFILE(*CURLIB/DOCKFILE) +
+                          MBR(DOCKFIL1)
+
+   /*******************************************/
+   /*** CALL THE MEMBER GENERATION PROGRAM  ***/
+   /*** FOR THE BATCH DOCK ERROR FILE       ***/
+   /*******************************************/
+    CALL BDKERFILE
+
+             DLCOBJ     OBJ((*CURLIB/DOCKFILE *FILE *EXCL DOCKFILE))
+   /*******************************************/
+   /*** CALL THE BATCH DOCK PROGRAM         ***/
+   /*******************************************/
+    CALL TBCHDOCK
+
+   /*******************************************/
+   /*** REPRINT BATCH DOCK ERROR REPORT     ***/
+   /*******************************************/
+    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DKERFILE)
+    /*** PRINT NUM MCPRT99 ***/
+    CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('039')
+    /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+    CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+    /*** NUMBER OF COPIES ***/
+    CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+    /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+    CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+    /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+    CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('Y')
+    CALL TPRTRPT
+
+    GOTO CMDLBL(FINI)
+
+   /*******************************************/
+   /*** REPRINT BATCH DOCK ERROR REPORT     ***/
+   /***   THIS TIME SEND THE REPORT TO      ***/
+   /***   CUMBERLAND'S T134DF2 MAINFRAME    ***/
+   /***   PRINTER VIA RJE.                  ***/
+   /*******************************************/
+    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DKERFILE)
+    /*** PRINT NUM MCPRT60 OUTQ MCMGR ***/
+    CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('060')
+    /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+    CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+    /*** NUMBER OF COPIES ***/
+    CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+    /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+    CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+    /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+    CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('Y')
+    CALL TPRTRPT
+
+    CPYSPLF    FILE(MCPRT60) TOFILE(MCPRD1/DOCKSPLF) +
+               SPLNBR(*LAST) CTLCHAR(*FCFC)
+    ADDLIBLE   LIB(QRJE)
+    MONMSG     MSGID(CPF0000)
+    SBMRJEJOB  FILE(MCPRD/QRJEJCL) MBR(PRINTJCL) +
+               SSND(QRJE/RMT6) CMD(*YES)
+
+FINI:
+    ENDPGM

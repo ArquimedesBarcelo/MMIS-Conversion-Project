@@ -1,0 +1,8 @@
+//BCHJOB  JOB(BXPAVRPT) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *JOBD) LOGCLPGM(*YES)
+/*********************************************************************/
+/***  SUBMIT JOB TO RUN COMMITMENT VS. ACTUAL REPORT ON MAINFRAME. ***/
+/*********************************************************************/
+SBMRJEJOB  FILE(MCPRD0/QRJEJCL) MBR(PRTPAVRPT) SSND(QRJE/QRJE) +
+             CMD(*YES)
+//ENDBCHJOB

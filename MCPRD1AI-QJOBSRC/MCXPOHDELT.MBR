@@ -1,0 +1,33 @@
+//BCHJOB  JOB(BPOHDELT) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*****************************************************************/
+/*  THIS JOB PURGES PO HISTORY INFORMATION FROM THE HISTORY DATA */
+/*  BASE 'STHIST' (MCFPST@@@@@).  ALL PURCHASE ORDER INFORMATION */
+/*  IS WRITTEN TO A FILE 'POHIST01'.  ONCE THIS ENDS THIS FILE   */
+/*  'POHIST01' SHOULD BE BACKED UP TO TAPE AND PURGED FROM THE   */
+/*  SYSTEM SINCE IT TAKES UP A LARGE AMOUNT OF DISK SPACE.       */
+/*  CAUTION MAKE SURE YOU HAVE A GOOD BACKUP OF 'POHIST01'       */
+/*  BEFORE PURGING IT !!!!!!!!!!!                                */
+/*****************************************************************/
+             DLTF       FILE(PODELTH)
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'PODELTH' +
+                          '014' '1000' '1000' '20')
+/*****************************************************************/
+/*  BUILD POHIST01.  THE SIZE CAN BE CHANGE TO CONSERVE SPACE IF */
+/*  YOU DETERMINE YOU DONT NEED THAT LARGE OF AN INITIAL         */
+/*  ALLOCATION.  IF THE CRTPF COMMAND ABENDS BECAUSE THIS FILE   */
+/*  'POHIST01' ALREADY EXISTS THEN THAT MEANS THIS FILE WAS NOT  */
+/*  BACKED UP TO TAPE OR YOU FORGOT TO PURGE THE FILE AFTER      */
+/*  YOU BACKED IT UP TO TAPE.  MAKE SURE YOU HAVE A GOOD BACKUP  */
+/*  OF 'POHIST01' BEFORE PURGING IT !!!!!!!!!!!                  */
+/*****************************************************************/
+             CRTPF      FILE(POHIST01) RCDLEN(520) SIZE(50000 5000 50)
+             GRTOBJAUT  OBJ(*CURLIB/POHIST01) OBJTYPE(*FILE) +
+                          USER(*PUBLIC) AUT(*ALL)
+/*****************************************************************/
+/*  RUN TPOHDELT TO DO THE DELETE.  THE ONLY ACCEPT VALUE IS     */
+/*  THE MAXIMUM NO. OF P.O.S TO DELETE DURING A SINGLE RUN.      */
+/*  IT IS A FIVE DIGIT NUMBER IN THE PARM FIELD BELOW.           */
+/*****************************************************************/
+             CALL PGM(TPOHDELT) PARM('00001')
+//ENDBCHJOB

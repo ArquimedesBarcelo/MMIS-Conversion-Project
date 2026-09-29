@@ -1,0 +1,136 @@
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&JCWVALUE) TYPE(*CHAR) LEN(1)
+
+             CHGCURLIB MCPRD1
+ALLOCATIT:
+             ALCOBJ     OBJ((*CURLIB/RJECODES *FILE *EXCL *FIRST)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+   /**************************************************************/
+   /***  CHECK FOR EXISTENCE OF EACH GENERATION.  IF NOT       ***/
+   /***  THERE, CREATE IT.  NOTE!  *CURLIB IS USED FOR         ***/
+   /***  ALL FILE CREATES, DELETES, RENAMES, AND OVRDBFS!      ***/
+   /**************************************************************/
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE9' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE8' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE7' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE6' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE5' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE4' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE3' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODE2' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODES' '133' '1000' '1000' '30' &S)
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE RJECODES FILE      ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+   CALL MCDLT    PARM('RJECODE9')
+   CALL MCXRENAM PARM('RJECODE8' 'RJECODE9')
+   CALL MCXRENAM PARM('RJECODE7' 'RJECODE8')
+   CALL MCXRENAM PARM('RJECODE6' 'RJECODE7')
+   CALL MCXRENAM PARM('RJECODE5' 'RJECODE6')
+   CALL MCXRENAM PARM('RJECODE4' 'RJECODE5')
+   CALL MCXRENAM PARM('RJECODE3' 'RJECODE4')
+   CALL MCXRENAM PARM('RJECODE2' 'RJECODE3')
+   CALL MCXRENAM PARM('RJECODES' 'RJECODE2')
+   CALL CCRTFILE PARM('*CURLIB' 'RJECODES' '133' '1000' '1000' '30' &S)
+
+   /********************************************************/
+   /*** PURGE AND REBUILD THE RAW BATCH ERR AND RPT FILES***/
+   /********************************************************/
+   CALL MCDLT PARM('RAWBTRPT')
+   CALL CCRTFILE PARM('*CURLIB' 'RAWBTRPT' '133' '1000' '1000' '30' &S)
+   CALL MCDLT PARM('RAWBTERR')
+   CALL CCRTFILE PARM('*CURLIB' 'RAWBTERR' '133' '1000' '1000' '30' &S)
+   /*** OVERRIDE TO DESIRED PRINTER FOR CORP CODE ***/
+   /*** ADD, MODIFIES, DELETES REPORT             ***/
+   OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+   /********************************************************/
+   /*** WHAT THE HECK, CALL THE PROGRAM...               ***/
+   /********************************************************/
+    CHGDTAARA  DTAARA(*LDA (285 1)) VALUE('N')
+    OVRDBF     FILE(RJECODES) TOFILE(*CURLIB/RJECODE2)
+    CALL TAKRUPDT
+   /*******************************************/
+   /*** REPRINT RAW BATCH REPORT            ***/
+   /*******************************************/
+   RTVDTAARA  DTAARA(*LDA (283 1)) RTNVAR(&JCWVALUE)
+   IF (&JCWVALUE = 'Y') DO
+      OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/RAWBTRPT)
+      /*** PRINT NUM ***/
+      CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('099')
+      /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+      CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+      /*** NUMBER OF COPIES ***/
+      CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+      /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+      CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+      /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+      CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('N')
+      CALL TPRTRPT
+   ENDDO
+   /*******************************************/
+   /*** REPRINT RAW BATCH ERROR REPORT      ***/
+   /*******************************************/
+   RTVDTAARA  DTAARA(*LDA (283 1)) RTNVAR(&JCWVALUE)
+   IF (&JCWVALUE = 'Y') DO
+      OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/RAWBTERR)
+      /*** PRINT NUM ***/
+      CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('099')
+      /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+      CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+      /*** NUMBER OF COPIES ***/
+      CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+      /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+      CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+      /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+      CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('N')
+      CALL TPRTRPT
+   ENDDO
+   /*******************************************/
+   /*** REPRINT REQUISITION ADD REPORT      ***/
+   /*******************************************/
+   RTVDTAARA  DTAARA(*LDA (284 1)) RTNVAR(&JCWVALUE)
+   IF (&JCWVALUE = 'Y') DO
+      OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DRPTRQFL)
+      /*** PRINT NUM ***/
+      CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('099')
+      /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+      CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+      /*** NUMBER OF COPIES ***/
+      CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+      /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+      CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+      /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+      CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('N')
+      CALL TPRTRPT
+   ENDDO
+   /*******************************************/
+   /*** REPRINT INVOICE CHECK UPDATE REPORT ***/
+   /*******************************************/
+   RTVDTAARA  DTAARA(*LDA (285 1)) RTNVAR(&JCWVALUE)
+   IF (&JCWVALUE = 'Y') DO
+      OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DRPTICHK)
+      /*** PRINT NUM ***/
+      CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('099')
+      /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+      CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+      /*** NUMBER OF COPIES ***/
+      CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+      /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+      CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+      /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+      CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('Y')
+      CALL TPRTRPT
+   ENDDO
+   DLCOBJ     OBJ((*CURLIB/RJECODE2 *FILE *EXCL *FIRST))

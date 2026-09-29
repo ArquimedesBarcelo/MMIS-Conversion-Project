@@ -1,0 +1,10 @@
+//BCHJOB  JOB(BBADREQ) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*## DELETES REQUISITIONS IN THE SYSTEM THAT SHOULD HAVE A DREQD  ##*/
+/*## SEGMENT BUT DO NOT, ALSO DELETES ANY REQS WITHOUT A DREQITM  ##*/
+/*## SEGMENT.  BASICALLY, DELETES ALL "BAD" REQS FROM THE SYSTEM. ##*/
+/*##################################################################*/
+CALL TBADREQ
+C
+//ENDBCHJOB

@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BCSVCHSD) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##       C S A S  JOB 'BCSVCHSD'      (SA7)                     ##*/
+/*## SEND VOUCHER (DATA) TO AKRON BY SUBMITTING AN RJE JOB.       ##*/
+/*##################################################################*/
+             SBMRJEJOB  FILE(MCPRD/QRJEJCL) MBR(RJVCHJCL) +
+                          SSND(QRJE/RJESSN) CMD(*YES)
+//ENDBCHJOB

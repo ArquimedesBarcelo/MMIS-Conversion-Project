@@ -1,0 +1,31 @@
+/* PRINT THE SHIPPING RELEASE REPORT                              */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/RELRPTFL)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('025')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('Y')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+/* PRINT THE SHIPPING RELEASE ERROR REPORT                        */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/RELERRFL)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('025')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('Y')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+
+             DLTF       FILE(RLACTIVE)
+//ENDBCHJOB

@@ -1,0 +1,11 @@
+   PGM
+
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT11)
+             OVRDBF     FILE(FRTERRFL) TOFILE(*LIBL/FRTERRFL) MBR(DAILYERR)
+             CALL       PGM(TFRTERR)
+             DLTOVR     FILE(*ALL)
+             CPYF       FROMFILE(FRTERRFL) TOFILE(FRTERRFL) +
+                        FROMMBR(DAILYERR) TOMBR(FRTERRFL)   +
+                        MBROPT(*ADD)
+             CLRPFM     FILE(FRTERRFL) MBR(DAILYERR)
+             ENDPGM

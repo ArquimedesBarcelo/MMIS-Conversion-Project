@@ -1,0 +1,9 @@
+             PGM /*CLNRCVFILE*/
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(16)
+
+             CLRPFM     FILE(MCPRD1/NRCVRPT)
+
+/* RUN FOR DATES XXXXXXXX TO XXXXXXXX */
+             CHGVAR     VAR(&DATALINE) VALUE('2000060120011031')
+             CALL       PGM(TNRCVFIL) PARM(&DATALINE)
+             ENDPGM

@@ -1,0 +1,9 @@
+             PGM        /*BRPTDUIN*/
+             DCL        VAR(&ROUTE)    TYPE(*CHAR) LEN(80)
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(112)
+CMDCALL:
+             CHGVAR     VAR(&ROUTE) VALUE('MATCONT        +
+                          1210099MCMGR   MCMGR   MCPRD   51    02    -
+                      ')
+             CALL       TRPTDUIN PARM(&ROUTE &DATALINE)
+ENDPGM

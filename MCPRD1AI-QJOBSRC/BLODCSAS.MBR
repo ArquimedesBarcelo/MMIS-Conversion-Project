@@ -1,0 +1,15 @@
+//BCHJOB  JOB(BLODCSAS) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *JOBD) LOGCLPGM(*YES)
+/*********************************************************************/
+/***  LOAD CODES?  (Y/N)                                           ***/
+/***  IS THIS AN INITIAL LOAD?  (Y/N)                              ***/
+/***  LOAD CODES WITH ZERO ONHAND?  (Y/N)                          ***/
+/***  PRINT ONLY CODES IN ERROR?  (Y/N)                            ***/
+/*********************************************************************/
+           OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+           CALL       PGM(TLODCSAS)
+NO
+YES
+YES
+YES
+//ENDBCHJOB

@@ -1,0 +1,4 @@
+             PGM /*CLMANSENT*/
+             CHGDTAARA  DTAARA(*LDA (289 1)) VALUE('1')
+             CALL TMANSENT
+ EOJ:        ENDPGM

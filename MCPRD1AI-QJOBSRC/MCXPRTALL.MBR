@@ -1,0 +1,20 @@
+             PGM        /* Print ALL Mnf/Part Number Updates in Akron */
+
+             OVRPRTF    FILE(QSYSPRT) OUTQ(PD01) USRDTA(MNFUPDALL)
+                        MONMSG MSGID(CPF0000)
+
+             CPYF       FROMFILE(*LIBL/MNFROUTESL) TOFILE(QSYSPRT)
+                        MONMSG MSGID(CPF0000)
+
+             ADDLIBLE   LIB(TAATOOL)
+                        MONMSG MSGID(CPF0000)
+
+             MOVSPLF    FROMOUTQ(PD01) TOOUTQ(PRT03) FILE(QSYSPRT) +
+                          USRDTA(MNFUPDALL)
+                        MONMSG MSGID(CPF0000)
+
+             MOVSPLF    FROMOUTQ(PD01) TOOUTQ(PRT03) FILE(QPQUPRFIL) +
+                          USER(PRINTIT) USRDTA(MNFUPDALL) JOB(QPRTJOB)
+                        MONMSG MSGID(CPF0000)
+
+             ENDPGM

@@ -1,0 +1,56 @@
+             PGM
+
+ /* TASK     2007-02544453 - 0001  2007 ANNUAL MMIS BREAK/FIX.  */
+ /*                                                             */
+ /*   MONITOR FILE COPY FOR EMPTY MEMBER                        */
+ /*                                                             */
+ /*                                                             */
+
+/* ******************************************************************/
+/* BRPTWRKPFM                                                       */
+/*     THIS JOB IS SUBMITTED FROM THE JOB BBRPT WHICH IS RUN WHEN   */
+/*     DATA IS SENT TO THE FORMS CONTROL TABLE ENTRY 'BRPT'.  THIS  */
+/*     JOB WILL RENAME THE MEMBERS IN THE FILE DLYBLUP TO MAINTAIN  */
+/*     THE GENERATIONS OF DATA.  THE JOB BRPTPROC WILL THEN BE      */
+/*     SUBMITTED RUN THE PROGRAM TBLOWRPT.                          */
+/********************************************************************/
+
+             RMVM   FILE(DLYBLUP)  MBR(DLYBLUP9)
+             MONMSG MSGID(CPF0000)
+
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP8)   NEWMBR(DLYBLUP9)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP7)   NEWMBR(DLYBLUP8)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP6)   NEWMBR(DLYBLUP7)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP5)   NEWMBR(DLYBLUP6)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP4)   NEWMBR(DLYBLUP5)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP3)   NEWMBR(DLYBLUP4)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP2)   NEWMBR(DLYBLUP3)
+             MONMSG MSGID(CPF0000)
+             RNMM   FILE(DLYBLUP)  MBR(DLYBLUP1)   NEWMBR(DLYBLUP2)
+             MONMSG MSGID(CPF0000)
+
+             ADDPFM     FILE(DLYBLUP) MBR(DLYBLUP1)
+             MONMSG CPF0000
+             CLRPFM     FILE(DLYBLUP) MBR(DLYBLUP1)
+             MONMSG CPF0000
+
+             CPYF       FROMFILE(DLYBLUP) TOFILE(DLYBLUP) +
+                          FROMMBR(DLYBLUP) TOMBR(DLYBLUP1) +
+                          MBROPT(*REPLACE) CRTFILE(*YES)
+             MONMSG CPF0000
+
+             CLRPFM     FILE(DLYBLUP) MBR(DLYBLUP)
+
+             SBMJOB     CMD(CALL PGM(BRPTPROC)) JOB(BRPTPROC) +
+                          JOBD(*LIBL/MCMGR) JOBQ(HBATCH) +
+                          PRTDEV(*JOBD) OUTQ(*JOBD) USER(*JOBD) +
+                          PRTTXT(*JOBD) CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+
+             ENDPGM

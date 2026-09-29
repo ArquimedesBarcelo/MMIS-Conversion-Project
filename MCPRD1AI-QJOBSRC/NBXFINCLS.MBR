@@ -1,0 +1,119 @@
+//BCHJOB  JOB(BXFINCLS) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##         C S A S   JOB 'BXFINCLS'                             ##*/
+/*## THIS JOB PERFORMS THE FINAL MONTHLY CLOSING PROCEDURE FOR    ##*/
+/*## CSAS.  THIS JOB IS STARTED BY 'TSTRMCLS' (SR7) VIA STRDBRDR. ##*/
+/*##################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+/*##################################################################*/
+/* ADDED NEW LOGIC 6/23/99 TO SAVE THE PREVIOUS MONTH'S CHECKBOOK   */
+/* DATA FILES SO THAT THE USERS COULD RETRIEVE REPORTS VIA THE      */
+/* R205 OPTION IN THE SPECIAL APPLICATIONS (SPECAPP) MENU.          */
+/* REMOVED CLRPFM'S FOR MASTER AND TRANSACTION FILES SO THAT        */
+/* DATA COULD BE RETAINED FOR LONGER THAN 1 MONTH FOR RETRIEVALS    */
+/* BY THE NICKEL AND DIME SAVINGS TEAM (GAMBOA/CUBA/MOLINA)         */
+/*##################################################################*/
+/*           CLRPFM     FILE(MCPRD1/MCFPCA06LM)                     */
+/*           CLRPFM     FILE(MCPRD1/MCFPCA07LM)                     */
+/*           CLRPFM     FILE(MCPRD1/FPREQSLM)                       */
+/*           CLRPFM     FILE(MCPRD1/FPSTRALM)                       */
+             CPYF       FROMFILE(MCPRD1/MCFPCA0600) +
+                         TOFILE(MCPRD1/MCFPCA06LM) MBROPT(*ADD)
+             CPYF       FROMFILE(MCPRD1/MCFPCA0700) +
+                         TOFILE(MCPRD1/MCFPCA07LM) MBROPT(*ADD)
+             CPYF       FROMFILE(BVALIB/FPREQSFI) +
+                         TOFILE(BVALIB/FPREQSLM) MBROPT(*ADD)
+             CPYF       FROMFILE(BVALIB/FPSTRACT) +
+                         TOFILE(BVALIB/FPSTRALM) MBROPT(*ADD)
+/*##################################################################*/
+/* KEEP RUNNING THE MONTH-TO-DATE TRANSACTION REPORT UNTIL THE      */
+/* COPYING OF MTD TRANSACTIONS TO DISK AND THEN TO TAPE IS FULLY    */
+/* OPERATIONAL.                                                     */
+/*                                                                  */
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TMTDTRNS)
+/**************************************************/
+/* 08MAY1995 COMMENT OUT MCFPCAMTD LOGIC  -PLUM   */
+/*           CLRPFM     FILE(*CURLIB/MCFPCAMTD)   */
+/*           CALL       PGM(TMTDCSAS)             */
+/**************************************************/
+             CALL       PGM(TCOSTVAL)
+             CALL       MCDLT PARM('CLASFILE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CLASFILE' +
+                          '092' '0500' '0500' '09')
+             CALL       PGM(TDRCHGIV)
+             CALL       PGM(TMOVERPT)
+Y
+             CALL       PGM(TDTLCHGS)
+/* 08MAY1995 - ADDED LOGIC TO DELETE (IF IT EXISTS) AND THEN RECREATE  */
+/*    FILE VOCHRFLE PRIOR TO TSUMCHGS, AS IS DONE IN BXPRECLS.  -PLUM  */
+             CALL       MCDLT    PARM('VOCHRFLE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFLE' +
+                          '080' '2000' '1000' '20')
+             CALL       MCDLT    PARM('VOCHRFL2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'VOCHRFL2' +
+                          '080' '2000' '1000' '20')
+             CALL       PGM(TSUMCHGS)
+1
+             CALL       PGM(TSUMCHGS)
+2
+             CALL       PGM(TWOINVCH)
+/* 08MAY1995 ADDED THE FOLLOWING CLRPFM COMMAND FOR THE NEW DTRANS2 */
+/*    DATASET WHICH IS NOW USED BY TBEGMTH.  -DAVE PLUM             */
+             CLRPFM     FILE(MCPRD1/MCFPCA1200)
+             CALL       PGM(TBEGMTH)
+             CALL       PGM(TCSDLCDE)
+/* NEXT RUN THE ENG. STORES MONTHLY WRITEDOWN PROCEDURE.  ALL   */
+/* CODES WITH A VALUE OF 50.00 OR MORE MARKED FOR WRITEDOWN ARE */
+/* REDUCED BY 1.25%. A 'Y' RESPONSE MEANS THIS IS THE FINAL RUN */
+/* NOT AN EDIT RUN (SR9)                                        */
+             CALL       PGM(TMNTHWDN)
+Y
+/*##################################################################*/
+/*# PRINT REPORT FROM TDTLCHGS.                                    #*/
+/*##################################################################*/
+             OVRDBF     FILE(MCFPRPT) TOFILE(*CURLIB/DDTLCHGS)
+             /*** PRINT NUM ***/
+             CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('097')
+             /*** PAPER WIDTH. 'Y' = 132 (COMPRESSED), 'N' = 80 ***/
+             CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+             /*** NUMBER OF COPIES ***/
+             CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+             /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+             CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+             CALL TPRTRPT
+/*#################################################################*/
+/* STREAM BHOLDTRN WHICH PROCESSES ANY TRANSACTIONS NOT         */
+/* PROCESSED BECAUSE OF THE TC DATE WAS AFTER THE MONTH-END     */
+/* CUTOFF DATE.  BHOLDTRN IS A MONTH-END VERSION OF BXDLYTRN    */
+             STRDBRDR   FILE(QJOBSRC) MBR(BHOLDTRN)
+/*##################################################################*/
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

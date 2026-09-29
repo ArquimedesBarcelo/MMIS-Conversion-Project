@@ -1,0 +1,30 @@
+//BCHJOB  JOB(RELCRTE) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             CHGDTAARA  DTAARA(*LDA (258 1)) VALUE('1')
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE RELFILE FILE       ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+   CALL MCXCRTFIL PARM('*CURLIB' 'RELFILE4' '106' '1000' '1000' +
+                 '30')
+   CALL MCXCRTFIL PARM('*CURLIB' 'RELFILE3' '106' '1000' '1000' +
+                 '30')
+   CALL MCXCRTFIL PARM('*CURLIB' 'RELFILE2' '106' '1000' '1000' +
+                 '30')
+   CALL MCXCRTFIL PARM('*CURLIB' 'RELFILE' '106' '1000' '1000' +
+                 '30')
+   CALL MCDLT    PARM('RELFILE5')
+   CALL MCXRENAM PARM('RELFILE4' 'RELFILE5')
+   CALL MCXRENAM PARM('RELFILE3' 'RELFILE4')
+   CALL MCXRENAM PARM('RELFILE2' 'RELFILE3')
+   CALL MCXRENAM PARM('RELFILE' 'RELFILE2')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'RELFILE' +
+                 '106' '1000' '1000' '30')
+   CALL MCDLT    PARM('RELRPTFL')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'RELRPTFL' +
+                 '133' '1000' '1000' '30')
+   CALL MCDLT    PARM('RELERRFL')
+   CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'RELERRFL' +
+                 '133' '1000' '1000' '30')
+CALL FOTRELBATC

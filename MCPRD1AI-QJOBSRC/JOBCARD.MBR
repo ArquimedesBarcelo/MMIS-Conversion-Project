@@ -1,0 +1,2 @@
+//BCHJOB  JOB(JOBNAME.) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)

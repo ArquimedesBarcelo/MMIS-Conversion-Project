@@ -1,0 +1,24 @@
+//BCHJOB  JOB(BMOVERPT) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##         C S A S  JOB  'BMOVERPT'    (SR17)                  ##*/
+/*## THIS JOB PRODUCES A STOREROOM MOVEMENT REPORT FOR CSAS.     ##*/
+/*#################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CMDCALL:
+             CALL       MCDLT PARM('CLASFILE')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'CLASFILE' +
+                          '092' '0500' '0500' '09')
+             CALL       PGM(TDRCHGIV)
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TMOVERPT)
+N
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+//ENDBCHJOB

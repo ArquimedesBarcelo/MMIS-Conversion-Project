@@ -1,0 +1,27 @@
+             PGM
+/********************************************************************/
+/*** BCHAT                                                          */
+/***     THIS JOB IS SUBMITTED WHENEVER DATA IS SENT TO THE FORMS   */
+/***     CONTROL TABLE ENTRY CHAT.  THE DATA WILL BE PLACED IN THE  */
+/***     FILE(CHATNO) MBR(CHATNO) TO BE PROCESSED WHEN THE JOB      */
+/***     BCHTWRKPFM IS SUBMITTED.                                   */
+/********************************************************************/
+
+             DCL        VAR(&INFILE) TYPE(*CHAR) LEN(30)
+ALLOCATIT:
+             ALCOBJ     OBJ((MCPRD1/CHATNO *FILE *EXCL CHATNO)) +
+                          WAIT(5)
+             MONMSG     MSGID(CPF0000) EXEC(DO)
+                DLYJOB     DLY(30)
+                GOTO ALLOCATIT
+             ENDDO
+
+             CALL PGM(QMRSWTR) PARM(&INFILE)
+             DLCOBJ     OBJ((MCPRD1/CHATNO *FILE *EXCL CHATNO))
+
+             SBMJOB     CMD(CALL PGM(BCHTWRKPFM)) JOB(BCHTWRKPFM) +
+                          JOBD(*LIBL/MCMGR) JOBQ(QBATCH) +
+                          PRTDEV(*JOBD) OUTQ(*JOBD) USER(*JOBD) +
+                          PRTTXT(*JOBD) CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+             ENDPGM

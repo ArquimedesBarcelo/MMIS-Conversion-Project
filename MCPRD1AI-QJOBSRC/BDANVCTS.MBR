@@ -1,0 +1,3 @@
+             PGM /*BDANVCTS*/
+             CALL       PGM(MCPRD/TDANVCTS)
+EOJ:         ENDPGM

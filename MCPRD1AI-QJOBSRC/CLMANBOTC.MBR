@@ -1,0 +1,76 @@
+             PGM /*CLMANBOT*/
+             DCL        VAR(&MANTYPE) TYPE(*CHAR) LEN(1)
+             RTVDTAARA  DTAARA(*LDA (288 1)) RTNVAR(&MANTYPE)
+             IF ((&MANTYPE *EQ '1') *OR (&MANTYPE *EQ '2'))       +
+                  THEN(DO)
+/* IF THIS IS A NEW OR REPR CALL TMANTOR FOR CANADIAN TIRE PLANTS */
+                 CALL TMANTOR
+              ENDDO
+/* PRINT THE MANIFEST REPORT                                      */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/MANRPTFL)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('097')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+             IF (&MANTYPE *EQ '3')  THEN(DO)
+/* IF THIS IS A RLSE THEN RUN 'TINVTC' WHICH WILL CUT THE INVOICE */
+/* TCS '490' AND '492'                                            */
+                 CALL TINVTC
+/* PRINT THE LOCAL STORES ACCOUNTING REPORT                       */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/STRRPTFL)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('097')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+               ENDDO
+             IF ((&MANTYPE *EQ '1') *OR (&MANTYPE *EQ '2')        +
+                     *OR (&MANTYPE *EQ '3'))  THEN(DO)
+                 CALL       MCDLT PARM('PAYRPTFL')
+                 CALL   PGM(MCXCRTFIL) PARM('*CURLIB' 'PAYRPTFL' +
+                          '133' '1000' '1000' '20')
+                 CALL       MCDLT PARM('INVRPTFL')
+                 CALL   PGM(MCXCRTFIL) PARM('*CURLIB' 'INVRPTFL' +
+                          '133' '1000' '1000' '20')
+/*               DLTF       FILE(PAYRPTFL)                        */
+/*               DLTF       FILE(INVRPTFL)                        */
+/*               CALL   PGM(MCXCRTFIL) PARM('*CURLIB' 'PAYRPTFL' +*/
+/*                        '133' '1000' '1000' '20')               */
+/*               CALL   PGM(MCXCRTFIL) PARM('*CURLIB' 'PAYRPTFL' +*/
+/*                        '133' '1000' '1000' '20')               */
+                 CALL       PGM(TPAYIRPT)
+/* PRINT THE INVOICES PAID BY INVOICE INFORMATION REPORT          */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/INVRPTFL)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('097')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+/* PRINT THE PREPAID INVOICES REPORT                              */
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/PAYRPTFL)
+                 CALL TPRTRPT
+               ENDDO
+ EOJ:        ENDPGM

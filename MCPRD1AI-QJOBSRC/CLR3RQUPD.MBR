@@ -1,0 +1,8 @@
+             PGM
+
+             SBMJOB     CMD(CALL PGM(*LIBL/BXR3RQUPD)) JOB(BXR3RQUPD) +
+                          JOBD(MCMGR) JOBQ(HLBATCH) PRTDEV(*JOBD) +
+                          OUTQ(*JOBD) USER(*JOBD) PRTTXT(*JOBD) +
+                          CURLIB(*USRPRF) INLLIBL(*JOBD)
+
+             ENDPGM

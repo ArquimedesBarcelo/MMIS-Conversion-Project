@@ -1,0 +1,4 @@
+             PGM /*STAUTOLV*/
+             OVRPRTF    FILE(QPRINT) TOFILE(*LIBL/MCPRT99)
+             CALL       PGM(MCPRD/TAUTOLV) PARM(C   )
+EOJ:         ENDPGM

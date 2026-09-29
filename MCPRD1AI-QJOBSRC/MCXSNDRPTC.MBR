@@ -1,0 +1,70 @@
+             PGM        /* COPY R3 query reports & FILES to MCUTIL   */
+
+/* CODES WITH NO DESCRIPTION                     */
+             CRTDUPOBJ  OBJ(DDESC09) FROMLIB(MCPRD1) OBJTYPE(*FILE) +
+                          TOLIB(MCUTIL) DATA(*YES)
+             MONMSG     MSGID(CPF0000)
+
+             DLTF       FILE(MCPRD1/DDESC09)
+             MONMSG     MSGID(CPF0000)
+
+             MOVOBJ     OBJ(DDESC09) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+             CRTDUPOBJ  OBJ(NODESCFL) FROMLIB(MCPRD1) OBJTYPE(*FILE) +
+                          TOLIB(MCUTIL) DATA(*YES)
+             MONMSG     MSGID(CPF0000)
+
+             DLTF       FILE(MCPRD1/NODESCFL)
+             MONMSG     MSGID(CPF0000)
+             MOVOBJ     OBJ(NODESC) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+             MOVOBJ     OBJ(NODESCRPT) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO PART NUMBER                     */
+             MOVOBJ     OBJ(MSGMNFPN) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* MREQ REPORT                                   */
+             MOVOBJ     OBJ(MREQ6MOS) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO AVERAGE COST                    */
+             MOVOBJ     OBJ(AVGCOST0) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* CODES WITH NO AVERAGE COST & ONHAND = 0       */
+             MOVOBJ     OBJ(AVGCOST0B) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* DUPLICATE CODES                               */
+             MOVOBJ     OBJ(DUPCODES) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* UNINITIALIZED CODES                           */
+             MOVOBJ     OBJ(UNINITMP1) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* OPEN PURCHASE ORDERS                          */
+             MOVOBJ     OBJ(OPENORDERS) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* OPEN INTERNAL TRANSFER PURCHASE ORDERS        */
+             MOVOBJ     OBJ(OPENITORDS) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* PO ITEMS WITH ZERO QUANTITY                   */
+             MOVOBJ     OBJ(POZEROQTY) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* PO ITEMS WITH ZERO UNIT PRICE                 */
+             MOVOBJ     OBJ(POZEROPRC) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+/* EXPIRED REQUIREMENT ORDERS                    */
+             MOVOBJ     OBJ(EXPREQ) OBJTYPE(*QRYDFN) TOLIB(MCUTIL)
+             MONMSG     MSGID(CPF0000)
+
+             ENDPGM

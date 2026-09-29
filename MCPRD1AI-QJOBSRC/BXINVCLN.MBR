@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BINVCLN) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*## C S I S  JOB  'BINVCLN'                                      ##*/
+/*##   THIS JOB RUNS THE PROGRAM REMOVE OLD INVENTORY UPDATE      ##*/
+/*##   FILES FROM R3INVUPD.                                       ##*/
+/*##################################################################*/
+             CALL       PGM(TINVCLNUP)
+//ENDBCHJOB

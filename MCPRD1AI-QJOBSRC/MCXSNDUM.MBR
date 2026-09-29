@@ -1,0 +1,36 @@
+             PGM        /* Create UM Report and send to Akron */
+
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(30)
+ START:
+
+ /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+
+             RTVNETA    SYSNAME(&SYSTEM)
+
+             CHGVAR     VAR(&PRINTTEXT) VALUE('CSAS/CSIS UM Report: +
+                          ' *CAT &SYSTEM)
+
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+ /*  OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE             */
+
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 195) LPI(6) +
+                          CPI(15) OVRFLW(60) OUTQ(PD01) +
+                          USRDTA(UMREPORT)
+             MONMSG     MSGID(CPF0000)
+
+ /*  GENERATE THE REPORT                                           */
+
+             RUNQRY     QRY(UMQUERY)
+             MONMSG     MSGID(CPF0000)
+
+ /*  SEND THE GENERATED SPOOL FILE TO AKRON60                      */
+
+             SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                          SPLNBR(*LAST) DTAFMT(*ALLDATA)
+             MONMSG     MSGID(CPF0000)
+
+ END:
+
+             ENDPGM

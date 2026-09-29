@@ -1,0 +1,54 @@
+//BCHJOB  JOB(BXDLYTRNC) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##               C S A S   JOB 'BXDLYTRN'                       ##*/
+/*## THIS JOB PROCESSES THE STORES CUTOFF TRANSACTIONS IN THE     ##*/
+/*## 'ABSTFIL' FILES.  THIS JOB IS STARTED BY 'BABST' WHENEVER A  ##*/
+/*## SUCCESSFUL SEND IS DONE.                                     ##*/
+/*##################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+/*##################################################################*/
+             OVRDBF     FILE(ABSTFILE) TOFILE(*LIBL/ABSTFIL2)
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             OVRPRTF    FILE(MCPRTA) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TDLYCHGS)
+
+             OVRDBF     FILE(MCFPRPT) TOFILE(MCPRD1/DDLYCHGS)
+             /*** PRINT NUM ***/
+             CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('097')
+             /*** PAPER WIDTH. 'Y' = 132 (COMPRESSED), 'N' = 80 ***/
+             CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+             /*** NUMBER OF COPIES ***/
+             CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+             /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+             CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+             CALL TPRTRPT
+/*##################################################################*/
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

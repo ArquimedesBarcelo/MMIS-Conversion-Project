@@ -1,0 +1,43 @@
+   /**************************************************************/
+   /*** NOTE!!!!! THIS JOB MUST RUN IN A SINGLE-THREADED JOB   ***/
+   /*** QUEUE!!!!!!!!!!                                        ***/
+   /**************************************************************/
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+
+   /**************************************************************/
+   /***  CHECK FOR EXISTENCE OF EACH GENERATION.  IF NOT       ***/
+   /***  THERE, CREATE IT.  NOTE!  *CURLIB IS USED FOR         ***/
+   /***  ALL FILE CREATES, DELETES, RENAMES, AND OVRDBFS!      ***/
+   /**************************************************************/
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY9' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY8' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY7' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY6' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY5' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY4' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY3' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY2' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY1' '133' '1000' '1000' '30' &S)
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE INVDUTY FILE       ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+   CALL MCDLT    PARM('INVDUTY9')
+   CALL MCXRENAM PARM('INVDUTY8' 'INVDUTY9')
+   CALL MCXRENAM PARM('INVDUTY7' 'INVDUTY8')
+   CALL MCXRENAM PARM('INVDUTY6' 'INVDUTY7')
+   CALL MCXRENAM PARM('INVDUTY5' 'INVDUTY6')
+   CALL MCXRENAM PARM('INVDUTY4' 'INVDUTY5')
+   CALL MCXRENAM PARM('INVDUTY3' 'INVDUTY4')
+   CALL MCXRENAM PARM('INVDUTY2' 'INVDUTY3')
+   CALL MCXRENAM PARM('INVDUTY1' 'INVDUTY2')
+   CALL CCRTFILE PARM('*CURLIB' 'INVDUTY1' '133' '1000' '1000' '30' &S)
+   /********************************************************/
+   /*** CALL THE PROGRAM                                 ***/
+   /********************************************************/
+   OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+   OVRDBF     FILE(INVDUTY) TOFILE(*CURLIB/INVDUTY2)
+   CALL TDUTYLOD
+   ENDPGM

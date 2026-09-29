@@ -1,0 +1,94 @@
+   PGM
+   /**************************************************************/
+   /*** BXLOADPO2:  THIS JOB RE-RUNS TLOADPO TO PROCESS ERROR  ***/
+   /*** RECORDS IN MCFPPOFILE MARKED FOR RE-TRANSMISSION.      ***/
+   /**************************************************************/
+
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&JCWVALUE) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&NEWRECS) TYPE(*CHAR) LEN(1)
+
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /**************************************************************/
+   /*** CALL THE PROGRAM TO COPY RECORDS FROM MCFPPOFILE TO    ***/
+   /*** MCFPPOFIL2.  IF NO NEW RECORDS ARE COPIED TO           ***/
+   /*** MCFPPOFIL2, GO TO THE END OF JOB.                      ***/
+   /**************************************************************/
+
+             CLRPFM     FILE(*CURLIB/MCFPPOFIL2)
+
+             OVRDBF     FILE(MCFPPOFILE) TOFILE(*CURLIB/MCFPPOFILE)
+             OVRDBF     FILE(MCFPPOFIL2) TOFILE(*CURLIB/MCFPPOFIL2)
+
+             CALL       PGM(TCPYPOFL) PARM(&NEWRECS)
+             DLCOBJ     OBJ((*CURLIB/MCFPPOFILE *FILE *EXCL *FIRST))
+             DLCOBJ     OBJ((*CURLIB/MCFPPOFIL2 *FILE *EXCL *FIRST))
+             IF         COND(&NEWRECS = 'N') THEN(GOTO CMDLBL(ENDJOB))
+
+   /**************************************************************/
+   /***  CHECK FOR EXISTENCE OF EACH GENERATION.  IF NOT       ***/
+   /***  THERE, CREATE IT.  NOTE!  *CURLIB IS USED FOR         ***/
+   /***  ALL FILE CREATES, DELETES, RENAMES, AND OVRDBFS!      ***/
+   /**************************************************************/
+
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL9' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL8' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL7' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL6' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL5' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL4' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL3' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFIL2' '133' '1000' '1000' '30' &S)
+   CALL CCRTFILE PARM('*CURLIB' 'AKPOFILE' '133' '1000' '1000' '30' &S)
+
+   /********************************************************/
+   /*** NOW RENAME GENERATIONS OF THE AKPOFILS FILE      ***/
+   /*** AND BUILD NEW ONE SO IT IS READY FOR NEXT        ***/
+   /*** TRANSMISSION.                                    ***/
+   /********************************************************/
+
+   CALL MCDLT    PARM('AKPOFIL9')
+   CALL MCXRENAM PARM('AKPOFIL8' 'AKPOFIL9')
+   CALL MCXRENAM PARM('AKPOFIL7' 'AKPOFIL8')
+   CALL MCXRENAM PARM('AKPOFIL6' 'AKPOFIL7')
+   CALL MCXRENAM PARM('AKPOFIL5' 'AKPOFIL6')
+   CALL MCXRENAM PARM('AKPOFIL4' 'AKPOFIL5')
+   CALL MCXRENAM PARM('AKPOFIL3' 'AKPOFIL4')
+   CALL MCXRENAM PARM('AKPOFIL2' 'AKPOFIL3')
+   CALL MCXRENAM PARM('AKPOFILE' 'AKPOFIL2')
+
+   /*** COPY MCFPPOFIL2 TO AKPOFIL2                      ***/
+
+   CPYF       FROMFILE(*CURLIB/MCFPPOFIL2) +
+              TOFILE(*CURLIB/AKPOFIL2) MBROPT(*REPLACE) +
+                     FMTOPT(*NOCHK)
+
+   CHGDTAARA  DTAARA(*LDA (285 1)) VALUE('N')
+   OVRDBF     FILE(AKPOFILE) TOFILE(*CURLIB/AKPOFIL2)
+
+   /*******************************************/
+   /*** CALL THE LOADPO PROGRAM             ***/
+   /*******************************************/
+
+    CALL TLOADPO
+
+   /*******************************************/
+   /*** REPRINT LOADPO ERROR REPORT         ***/
+   /*******************************************/
+    OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/DPOERFIL)
+    /*** PRINT NUM ***/
+    CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('025')
+    /*** COMPRESSED FLAG.  'Y' = COMPRESSED, OTHERWISE NOT ***/
+    CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('N')
+    /*** NUMBER OF COPIES ***/
+    CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+    /*** RANGE OF DATES. 'Y' = BRING UP SCRN 'N' = NO SCRN **/
+    CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+    /*** TODAY'S REPORT ONLY- IF DATE CONTROL CARDS IN FILE */
+    CHGDTAARA  DTAARA(*LDA (299 1)) VALUE('Y')
+    CALL TPRTRPT
+
+             DLCOBJ     OBJ((*CURLIB/AKPOFIL2 *FILE *EXCL *FIRST))
+
+ ENDJOB:     ENDPGM

@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BCSASTRN) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+OVRPRTF FILE(MCPRT) TOFILE(MCPRT97) COPIES(01) SHARE(*YES)
+CALL PGM(TCSASTRN)
+FRT ACCTG      ACCT097T000122 MCPRD   MCPRD   34  X 01
+01FRT                         ALL             DALL
+ALL                             ALL                             ALL
+ALL                   f3-END PROGRAM
+//ENDBCHJOB

@@ -1,0 +1,48 @@
+//BCHJOB  JOB(BXDLYTRNT) JOBD(*libl/MCMGRT) JOBQ(*JOBD)         +
+             LOG(*JOBD *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##               C S A S   JOB 'BXDLYTRNT'                      ##*/
+/*## THIS JOB PROCESSES THE STORES CUTOFF TRANSACTIONS IN THE     ##*/
+/*## 'ABSTFIL' FILES.  THIS JOB IS STARTED BY 'BABST' WHENEVER A  ##*/
+/*## SUCCESSFUL SEND IS DONE.                                     ##*/
+/*##################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+/*##################################################################*/
+             CHGCURLIB  T881S03
+             OVRDBF     FILE(ABSTFILE) TOFILE(*CURLIB/ABSTFIL2)
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT12)
+             OVRPRTF    FILE(MCPRTA) TOFILE(*LIBL/MCPRT12)
+             CALL       PGM(TDLYCHGS)
+             CALL       PGM(TDLYTRNS)
+             CALL       PGM(TCHKABRT)
+             CALL       PGM(TUNITCHK)
+             CALL       PGM(TCALCAVG)
+/*##################################################################*/
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

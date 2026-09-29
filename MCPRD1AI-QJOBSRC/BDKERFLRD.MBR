@@ -1,0 +1,14 @@
+             PGM        PARM(&ERRYEAR)
+
+             DCLF   FILE(*LIBL/DKERFILE)
+             DCL        VAR(&ERRYEAR)   TYPE(*CHAR) LEN(2)
+
+             /*** GET THE FIRST RECORD IN THE MEMBER ***/
+             RCVF
+             MONMSG MSGID(CPF0864) EXEC(DO)
+               RTVSYSVAL SYSVAL(QYEAR) RTNVAR(&ERRYEAR)
+               GOTO CMDLBL(EOJ)
+             ENDDO
+             CHGVAR VAR(&ERRYEAR) VALUE(%SST(&DKERFILE 2 2))
+EOJ:
+             ENDPGM

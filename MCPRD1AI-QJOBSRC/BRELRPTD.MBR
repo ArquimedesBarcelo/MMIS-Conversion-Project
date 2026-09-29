@@ -1,0 +1,18 @@
+//BCHJOB  JOB(BRELRPTD) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*** DO NOT change the parameters after the call to TRELRPT    ***/
+/*** unless the report is to be routed to someone other than   ***/
+/*** the Purchasing Dept.  Just type in the new name over the  ***/
+/*** default.                                                  ***/
+/***                                                           ***/
+/*** FIRST, CALL PROGRAM TO PRINT LAST MONTH'S REPORT.         ***/
+/***                                                           ***/
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+             CALL       PGM(TRELRPT)
+M00000000PURCHASING DEPT.
+/***                                                           ***/
+/*** THEN, CALL PROGRAM TO CLEAN UP AUDIT FILE.                ***/
+/***                                                           ***/
+             CALL       PGM(TRELCLN)
+             RGZPFM     (*LIBL/MCFPCS6100)
+//ENDBCHJOB

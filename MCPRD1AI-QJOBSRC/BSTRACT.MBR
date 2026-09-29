@@ -1,0 +1,50 @@
+             PGM
+/*#################################################################*/
+/*##                   JOB 'BSTRACT'                             ##*/
+/*##   THIS JOB ABSTRACTS SELECTED DATA FROM THE CSAS MTD        ##*/
+/*##   TRANSACTIONS FILE AND WRITES IT TO THE STRACT01 FILE.     ##*/
+/*#################################################################*/
+
+/*#################################################################*/
+/*##  SET THE CURRENT LIBRARY TO MCPRD1                          ##*/
+/*#################################################################*/
+             CHGCURLIB  CURLIB(MCPRD1)
+
+/*#################################################################*/
+/*##  CHECK FOR EXISTENCE OF EACH GENERATION.  IF IT IS NOT      ##*/
+/*##  THERE, CREATE IT.                                          ##*/
+/*#################################################################*/
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT10' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT09' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT08' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT07' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT06' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT05' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT04' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT03' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT02' '080' '5000' '1000' '99')
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT01' '080' '5000' '1000' '99')
+
+/*#################################################################*/
+/*## NOW RENAME GENERATIONS OF THE STRACT01 FILE, AND BUILD A    ##*/
+/*## NEW ONE.                                                    ##*/
+/*#################################################################*/
+   CALL MCDLT    PARM('STRACT10')
+   CALL MCXRENAM PARM('STRACT09' 'STRACT10')
+   CALL MCXRENAM PARM('STRACT08' 'STRACT09')
+   CALL MCXRENAM PARM('STRACT07' 'STRACT08')
+   CALL MCXRENAM PARM('STRACT06' 'STRACT07')
+   CALL MCXRENAM PARM('STRACT05' 'STRACT06')
+   CALL MCXRENAM PARM('STRACT04' 'STRACT05')
+   CALL MCXRENAM PARM('STRACT03' 'STRACT04')
+   CALL MCXRENAM PARM('STRACT02' 'STRACT03')
+   CALL MCXRENAM PARM('STRACT01' 'STRACT02')
+
+   CALL MCXCRTFIL PARM('*CURLIB' 'STRACT01' '080' '5000' '1000' '99')
+
+/*#################################################################*/
+/*##  CALL THE COBOL PROGRAM TSTRACT WHICH WILL WRITE CURRENT    ##*/
+/*##  MONTH TRANSACTIONS TO FILE STRACT01.                       ##*/
+/*#################################################################*/
+             CALL       PGM(TSTRACT)
+             ENDPGM

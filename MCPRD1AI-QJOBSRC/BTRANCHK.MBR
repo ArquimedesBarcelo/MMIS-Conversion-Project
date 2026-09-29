@@ -1,0 +1,9 @@
+//BCHJOB  JOB(BTRANCHK) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/*##           C S A S  JOB 'BTRANCHK'        (SR21)              ##*/
+/*## TRANSACTION ACCOUNTING CHECK REPORT.                         ##*/
+/*##################################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TTRANCHK)
+//ENDBCHJOB

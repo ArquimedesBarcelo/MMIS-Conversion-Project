@@ -1,0 +1,24 @@
+//BCHJOB  JOB(BCASHSPL) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##################################################################*/
+/* CALL PROGRAM TCASHSPL TO GATHER MTD C.A.S.H. DATA.               */
+/*##################################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT??) +
+                        COPIES(01) SHARE(*YES)
+
+             CALL       PGM(TCASHSPL)
+MTD CASH REPORT    0??MCMGR   *NONE   *NONE   00  X 01
+09FRT INV AADJSADJRET RETVISS ALL             DALL
+ALL                                                             Z
+ALL                             ALL         ALL                   X
+
+/*##################################################################*/
+/*  SEND E-MAIL MESSAGE TO AKRON SUPPORT TEAM.                      */
+/*##################################################################*/
+
+             SNDDST     TYPE(*MSG) TOUSRID((A334884 GTRLAN)) +
+                                           (T000122 GTRLAN)) +
+                                           (A343045 GTRLAN))) +
+                        DSTD('BXFINCLS') +
+                        MSG('CSAS monthly close (BXFINCLS) has COMPLETED.')
+//ENDBCHJOB

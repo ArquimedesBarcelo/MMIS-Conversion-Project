@@ -1,0 +1,51 @@
+//BCHJOB  JOB(BR3REQEX) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+             /*** CREATE FLAG FILE TO MAKE SURE NO OTHER REQ ***/
+             /*** CREATE JOBS ARE RUNNING.                   ***/
+             CRTPF      FILE(MA4ACTIV) RCDLEN(1) SIZE(1 1)
+             GRTOBJAUT  OBJ(*CURLIB/MA4ACTIV) OBJTYPE(*FILE) +
+                          USER(*PUBLIC) AUT(*ALL)
+
+             /*** MAKE SURE ALL THE GENERATIONS EXIST ***/
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQFI4' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQFI3' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQFI2' +
+                          '020' '1000' '1000' '20')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQFIL' +
+                          '020' '1000' '1000' '20')
+
+             /*** RENAME GENERATIONS OF REQUISITION FILE ***/
+             CALL       MCDLT    PARM('R3REQFI4')
+             CALL       MCXRENAM PARM('R3REQFI3' 'R3REQFI4')
+             CALL       MCXRENAM PARM('R3REQFI2' 'R3REQFI3')
+             CALL       MCXRENAM PARM('R3REQFIL' 'R3REQFI2')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQFIL' +
+                          '020' '1000' '1000' '20')
+             CALL       MCDLT    PARM('R3REQPTF')
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'R3REQRPT' +
+                          '133' '1000' '1000' '20')
+/* TREQABST IS ALSO EXECUTED IN JOB BXRQCORP. IF ANY CHANGES ARE  */
+/* MADE IN REGARDS TO PARAMETERS PASSED, PLEASE INCLUDE THE       */
+/* THE CHANGES IN THIS JOBSTREAM AS WELL.                         */
+             CALL TREQABST PARm('R3')
+/* PRINT THE SAP/R3 REQS REPORT                                   */
+             OVRPRTF    FILE(MCPRT) TOFILE(MCPRT99)
+/* OVERRIDE TO THE DESIRED REPORT FILE                            */
+                 OVRDBF     FILE(MCFPRPT) TOFILE(*LIBL/R3REQRPT)
+/* SPOOL TYPE: SHOULD ALWAYS BE 'N'                               */
+/*               CHGDTAARA  DTAARA(*LDA (291 1)) VALUE('N')       */
+/* PRINT NUM                                                      */
+                 CHGDTAARA  DTAARA(*LDA (292 3)) VALUE('001')
+/* PAPER WIDTH: 'Y' IS COMPRESSED                                 */
+                 CHGDTAARA  DTAARA(*LDA (295 1)) VALUE('Y')
+/* NUMBER OF COPIES                                               */
+                 CHGDTAARA  DTAARA(*LDA (296 2)) VALUE('01')
+/* RANGE OF DATES. 'Y' = BRING UP SCRN , 'N' = NO SCRN            */
+                 CHGDTAARA  DTAARA(*LDA (298 1)) VALUE('N')
+                 CALL TPRTRPT
+
+             /*** NOW OTHER REQ CREATE JOBS MAY RUN ***/
+             CALL       MCDLT    PARM('MA4ACTIV')
+ENDTHEJOB:

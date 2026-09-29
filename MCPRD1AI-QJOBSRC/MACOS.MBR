@@ -1,0 +1,142 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+   /**************************************************************/
+   /*** MACOS - THIS PROCEDURE SHOULD BE SCHEDULED TO RUN      ***/
+   /***         AUTOMATICALLY, ON THE FIRST CALENDAR DAY OF    ***/
+   /***         EACH MONTH, IN THOSE PLANTS THAT USE CSIS/MMIS ***/
+   /***         DATA TO SUPPLY RECEIPT DATA TO THE MATERIAL    ***/
+   /***         COST SYSTEM (MACOS).                           ***/
+   /***                                                        ***/
+   /***  09/11/2002   CA YODER   LUX REQUEST                   ***/
+   /***    CHANGED LENGTH OF MACOSSUM FILE FROM 80 TO 100      ***/
+   /***    CHARACTERS.                                         ***/
+   /***                                                        ***/
+   /*** THIS PROGRAM ASSUMES THE FOLLOWING:                    ***/
+   /***    - FILE MACOSDTL ALREADY EXISTS IN *CURLIB           ***/
+   /***         (ALL OTHER FILES WILL BE CREATED AS NEEDED)    ***/
+   /***                                                        ***/
+   /*** THIS PROGRAM WILL PERFORM THE FOLLOWING:               ***/
+   /***    1) CREATE AN EMPTY FILE NAMED MACOSFIL              ***/
+   /***    2) EXECUTE THE COBOL PROGRAM TMACOSRP WHICH WILL    ***/
+   /***          PLACE RAW MATERIAL RECEIVING SLIP DATA INTO   ***/
+   /***          FILE MACOSFIL                                 ***/
+   /***    3) SHUFFLE THE MACOSDTL* FILES                      ***/
+   /***          - KEEPING THE LAST X MONTHS WORTH OF DATA     ***/
+   /***    4) COPY FILE MACOSFIL TO MACOSDTL (DEFINED TO DDS)  ***/
+   /***    5) DELETE THE FILE MACOSTEMP                        ***/
+   /***    6) SHUFFLE THE MACOSSUM* FILES                      ***/
+   /***          - KEEPING THE LAST X MONTHS WORTH OF DATA     ***/
+   /***    7) EXECUTE QUERIES MACOSQSUM1 AND MACOSQSUM2 TO     ***/
+   /***          PLACE DATA INTO FILES MACOSTEMP AND MACOSSUM  ***/
+   /***    8) ESTABLISH THE PROPER PRINT OVERRIDES FOR QUERY   ***/
+   /***          REPORTS                                       ***/
+   /***    9) EXECUTE QUERIES MACOSQERR, MACOSQSUM, AND        ***/
+   /***          MACOSQDTL (OPTIONAL) WHICH PRODUCE REPORTS    ***/
+   /***   10) SEND THE DATA IN FILE MACOSSUM TO LUXEMBOURG     ***/
+   /***          USING THE SBMRJEJOB COMMAND                   ***/
+   /**************************************************************/
+
+   /* CHANGE THE JOB TO INSURE THAT A JOBLOG IS PRODUCED FOR NOW.    */
+             CHGJOB     LOG(4 0 *SECLVL) LOGCLPGM(*YES)
+
+   /* ESTABLISH THE CURLIB.  FILES WILL BE CREATED IN THIS LIBRARY.  */
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /* DELETE FILE MACOSFIL IF IT EXISTS, THEN THEN RECREATE IT AS AN */
+   /* EMPTY FILE.                                                    */
+             CALL       PGM(MCDLT) PARM('MACOSFIL')
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSFIL' +
+                          '200' '500' '100' '99' &S)
+
+   /* CALL COBOL PROGRAM TMACOSRP TO PUT RECEIVING SLIP DATA INTO    */
+   /* FILE MACOSFIL.  USING PARM = 'XXXXXX' WILL CAUSE DATA FOR THE  */
+   /* PREVIOUS MONTH (CURRENT MONTH - 1) TO BE WRITTEN TO THIS FILE. */
+   /* TO OBTAIN DATA FOR ANOTHER MONTH, SPECIFY THE YEAR AND MONTH   */
+   /* IN MMYYYY FORMAT (FOR EXAMPLE, '101996' FOR OCTOBER 1996).     */
+             CALL       PGM(TMACOSRP) PARM('XXXXXX')
+
+   /* "SHUFFLE" THE MACOSDTL* FILES, KEEPING X MONTHS WORTH OF DATA. */
+   /*    FIRST, WE CREATE ANY MISSING FILES (MACOSDTL MUST ALREADY   */
+   /*    EXIST).                                                     */
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSDTL5' +
+                          '200' '100' '100' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSDTL4' +
+                          '200' '100' '100' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSDTL3' +
+                          '200' '100' '100' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSDTL2' +
+                          '200' '100' '100' '99' &S)
+
+   /* NOW RENAME GENERATIONS OF THE MACOSDTL FILE                    */
+             CALL       PGM(MCDLT) PARM('MACOSDTL5')
+             CALL       PGM(MCXRENAM) PARM('MACOSDTL4' 'MACOSDTL5')
+             CALL       PGM(MCXRENAM) PARM('MACOSDTL3' 'MACOSDTL4')
+             CALL       PGM(MCXRENAM) PARM('MACOSDTL2' 'MACOSDTL3')
+             CRTDUPOBJ  OBJ(MACOSDTL) FROMLIB(*CURLIB) +
+                          OBJTYPE(*FILE) TOLIB(*FROMLIB) +
+                          NEWOBJ(MACOSDTL2) DATA(*YES)
+
+   /* COPY THE RECORDS FROM MACOSFIL TO MACOSDTL.  MACOSDTL IS       */
+   /*    DEFINED TO DDS.                                             */
+             CPYF       FROMFILE(*CURLIB/MACOSFIL) +
+                          TOFILE(*CURLIB/MACOSDTL) MBROPT(*REPLACE) +
+                          FMTOPT(*NOCHK)
+
+   /* DELETE THE MACOSQTEMP FILE (CREATED BY QUERY MACOSQSUM1) AND   */
+   /* "SHUFFLE" THE MACOSSUM* FILES.  QUERY MACOSQSUM2 WILL RECREATE */
+   /* THE MACOSSUM FILE.                                             */
+   /*                                                                */
+   /* 9/11/2002  CHANGED LENGTH OF MACOSSUM FILE FROM 80 TO 100      */
+   /*                                                                */
+             CALL       PGM(MCDLT) PARM('MACOSTEMP')
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSSUM5' +
+                          '100' '50' '50' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSSUM4' +
+                          '100' '50' '50' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSSUM3' +
+                          '100' '50' '50' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSSUM2' +
+                          '100' '50' '50' '99' &S)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'MACOSSUM' +
+                          '100' '50' '50' '99' &S)
+             CALL       PGM(MCDLT) PARM('MACOSSUM5')
+             CALL       PGM(MCXRENAM) PARM('MACOSSUM4' 'MACOSSUM5')
+             CALL       PGM(MCXRENAM) PARM('MACOSSUM3' 'MACOSSUM4')
+             CALL       PGM(MCXRENAM) PARM('MACOSSUM2' 'MACOSSUM3')
+             CALL       PGM(MCXRENAM) PARM('MACOSSUM' 'MACOSSUM2')
+
+   /* RUN QUERIES MACOSQSUM1 AND MACOSQSUM2 TO PLACE DATA INTO FILES */
+   /* MACOSTEMP AND MACOSSUM RESPECTIVELY.                           */
+             RUNQRY     QRY(MACOSQSUM1)
+             RUNQRY     QRY(MACOSQSUM2)
+
+   /* ESTABLISH THE PROPER OVERRIDES TO DIRECT THE QUERY REPORTS AS  */
+   /* DESIRED.                                                       */
+   /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('MACOS: ' *CAT &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+   /* OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE AND OUTQ     */
+   /*   LENGTH X WIDTH                                               */
+   /*       11 X 14 PAPER  - PAGESIZE(66 132) LPI(6) CPI(10)         */
+   /*      8.5 X 14 PAPER  - PAGESIZE(68 132) LPI(8) CPI(10)         */
+   /*       11 X 8.5 PAPER - PAGESIZE(66 132) LPI(6) CPI(16.7)       */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(10) OVRFLW(60) OUTQ(QGPL/PD01) +
+                          SAVE(*YES) USRDTA(MACOS)
+             MONMSG     MSGID(CPF0000)
+
+   /* RUN THE QUERY REPORT PROGRAMS.                                 */
+             RUNQRY     QRY(MACOSQERR) /* ERROR REPORT */
+             RUNQRY     QRY(MACOSQSUM) /* SUMMARY REPORT */
+         /***RUNQRY  QRY(MACOSQDTL)***/ /* OPTIONAL DETAIL REPORT */
+
+   /* SEND THE MACOSSUM FILE TO LUXEMBOURG VIA RJE.                  */
+   /*** 28MAR1996 THE SEND TO LUXEMBOURG IS NOT YET FUNCTIONAL. ***/
+        /*   SBMRJEJOB  FILE(*LIBL/QRJEJCL) MBR(MACOSSEND) +   */
+        /*                SSND(QRJE/RJESNA) CMD(*YES)          */
+
+             ENDPGM

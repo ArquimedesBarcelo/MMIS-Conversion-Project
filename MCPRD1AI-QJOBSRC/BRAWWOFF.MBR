@@ -1,0 +1,14 @@
+//BCHJOB  JOB(BRAWWOFF) JOBD(*libl/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*##############################################################*/
+/*##        C S A S  JOB 'BRAWWOFF'          (SR10)           ##*/
+/*## RAW MATERIAL ENDING DOLLAR WRITEOFF FOR AVERAGE COST.    ##*/
+/*## THIS JOB ONLY PRODUCES A REPORT; NO UPDATE IS DONE.      ##*/
+/*## THE ONLY OPTION ACCEPTED IS THE UPDATE-SW WHICH IS SET   ##*/
+/*## TO 'NO' TO DENOTE AN EDIT RUN.  THE ACTUAL UPDATE IS     ##*/
+/*## DONE IN THE BALANCE WRITEOFF JOB 'BBALWOFF' (SR20).      ##*/
+/*##############################################################*/
+             OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT97)
+             CALL       PGM(TRAWWOFF)
+NO
+//ENDBCHJOB

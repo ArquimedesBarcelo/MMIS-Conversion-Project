@@ -1,0 +1,270 @@
+PGM
+/*##################################################################*/
+/*##      C S I S  JOB  'BPOHDELT2'                               ##*/
+/*## THIS JOB PURGES PO HISTORY INFORMATION FROM THE HISTORY DATA ##*/
+/*## BASE 'STHIST'.  ALL PURCHASE ORDER INFORMATION IS WRITTEN    ##*/
+/*## TO A FLAT FILE 'POHIST01'.  ONCE THIS JOB ENDS THIS FILE     ##*/
+/*## 'POHIST01' SHOULD BE BACKED UP TO TAPE AND PURGED FROM THE   ##*/
+/*## SYSTEM SINCE IT TAKES A LARGE AMOUNT OF DISK SPACE.          ##*/
+/*## CAUTION MAKE SURE YOU HAVE A GOOD BACKUP OF 'POHIST01'       ##*/
+/*## BEFORE PURGING IT!!!!!!!                                     ##*/
+/*##################################################################*/
+/*                                                                  */
+/* 1/29/1997                                                        */
+/*   ADDED LOGIC TO AUTOMATICALLY RENAME THE FILE POHIST01 TO       */
+/*   A FLATFILE TO BE COPIED TO TAPE.  THE SEQUENCE NUMBER FOLLOWS  */
+/*   THE FOLLOWING STANDARD:                                        */
+/*       POHmmmyyxx   WHERE   mmm = month (JAN, FEB, MAR, etc.)     */
+/*                            yy  = year  (97, 98, 99, etc.)        */
+/*                            xx  = sequence number (01, 02, etc.)  */
+/*   THE DATA AREA MCPRD1/POHDELT IS MAINTAINED TO KEEP TRACK       */
+/*   OF THE LAST SEQUENCE NUMBER WRITTEN.  ONLY 99 FILES PER MONTH  */
+/*   ARE ALLOWED TO BE CREATED.                                     */
+/*                                                                  */
+/*   THE POH* FILES NEED TO BE TRANSFERRED TO TAPE AND THEN PURGED. */
+/*                                                                  */
+/********************************************************************/
+
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&MONTH) TYPE(*CHAR) LEN(3)
+             DCL        VAR(&YEAR) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&CURMONTH) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&CURYEAR) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SEQ) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&NEWSEQ) TYPE(*DEC) LEN(2 0)
+             DCL        VAR(&FILENAME) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&NEWMONTH) TYPE(*CHAR) LEN(3)
+             DCL        VAR(&POH) TYPE(*CHAR) LEN(3) VALUE(POH)
+
+/* Check if file POHIST01 exists.  If it DOES EXIST, then that     */
+/* means a previous run of this job had did not complete correctly */
+/* or it existed before this new procedure was implemented.  STOP  */
+/* and have the operator correct before running this job.          */
+             CHKOBJ     OBJ(MCPRD1/POHIST01) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF9801) EXEC(GOTO CMDLBL(CREATE))
+             SNDMSG     MSG('From BPOHDELT2:  *** POHIST01 already +
+                          exists.  This means that a previous run +
+                          of this job did not complete +
+                          successfully.  Please resolve problem and +
+                          then run the job again. ***') TOUSR(QSYSOPR)
+             GOTO       CMDLBL(EOJ)
+
+CREATE:      CRTPF      FILE(MCPRD1/POHIST01) RCDLEN(520) TEXT('PO +
+                          Hist. data. Must backup to tape before +
+                          delete!!') SIZE(100000 10000 30)
+             SNDMSG     MSG('From BPOHDELT2:  *** POHIST01 created. +
+                          ***') TOUSR(QSYSOPR)
+
+/* Check if data area POHDELT exists */
+             CHKOBJ     OBJ(MCPRD1/POHDELT) OBJTYPE(*DTAARA)
+
+/* If data area doesn't exist, create it. */
+             MONMSG     MSGID(CPF9801) EXEC(CRTDTAARA +
+                          DTAARA(MCPRD1/POHDELT) TYPE(*CHAR) +
+                          LEN(10) VALUE(POHXXX0000) TEXT('Last PO +
+                          History Delete Seq #'))
+
+/* Retrieve Data Area POHDELT info. */
+             RTVDTAARA  DTAARA(MCPRD1/POHDELT (4 3)) RTNVAR(&MONTH)
+             RTVDTAARA  DTAARA(MCPRD1/POHDELT (7 2)) RTNVAR(&YEAR)
+             RTVDTAARA  DTAARA(MCPRD1/POHDELT (9 2)) RTNVAR(&SEQ)
+
+/* Accept current month and year. */
+             RTVSYSVAL SYSVAL(QMONTH) RTNVAR(&CURMONTH)
+             RTVSYSVAL SYSVAL(QYEAR) RTNVAR(&CURYEAR)
+
+/* Set value corresponding to the month. */
+             IF         COND(&CURMONTH = '01') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(JAN))
+             IF         COND(&CURMONTH = '02') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(FEB))
+             IF         COND(&CURMONTH = '03') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(MAR))
+             IF         COND(&CURMONTH = '04') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(APR))
+             IF         COND(&CURMONTH = '05') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(MAY))
+             IF         COND(&CURMONTH = '06') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(JUN))
+             IF         COND(&CURMONTH = '07') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(JUL))
+             IF         COND(&CURMONTH = '08') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(AUG))
+             IF         COND(&CURMONTH = '09') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(SEP))
+             IF         COND(&CURMONTH = '10') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(OCT))
+             IF         COND(&CURMONTH = '11') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(NOV))
+             IF         COND(&CURMONTH = '12') THEN(CHGVAR +
+                          VAR(&NEWMONTH) VALUE(DEC))
+
+/* If month and year in POHDELT is the same as current month and year,  */
+/* increase sequence number by 1.  If the sequence number reaches 99,   */
+/* remind the operator to copy the old files to tape and then STOP.     */
+             IF         COND(&MONTH = &NEWMONTH *AND &YEAR = +
+                          &CURYEAR) THEN(DO)
+
+                 IF         COND(&SEQ = '99') THEN(DO)
+                 SNDMSG     MSG('From BPOHDELT2:  *** Sequence number is +
+                              equal to 99.  Please copy the old +
+                              MCPRD1/POH* files to tape and then purge +
+                              them.  This job cannot be run again this +
+                              month. ***') TOUSR(QSYSOPR)
+                 GOTO       CMDLBL(EOJ)
+                 ENDDO
+
+             CHGVAR     VAR(&NEWSEQ) VALUE(&SEQ)
+             CHGVAR     VAR(&NEWSEQ) VALUE(&NEWSEQ+1)
+             CHGVAR     VAR(&SEQ) VALUE(&NEWSEQ)
+             CHGVAR     VAR(&FILENAME) VALUE(&POH *CAT &NEWMONTH +
+                          *CAT &CURYEAR *CAT &SEQ)
+             ENDDO
+
+/* Otherwise, change to new month (and year) and set sequence number */
+/* to 01.                                                            */
+             ELSE       DO
+             CHGVAR     VAR(&SEQ) VALUE('01')
+             CHGVAR     VAR(&FILENAME) VALUE(&POH *CAT &NEWMONTH +
+                          *CAT &CURYEAR *CAT &SEQ)
+             ENDDO
+
+
+/* Start job to delete POs. */
+START:       SNDMSG     MSG('*** From BPOHDELT2:  Beginning history +
+                          delete. ***') TOUSR(QSYSOPR)
+
+             CALL       PGM(FOTPOHDELT)
+             CALL       PGM(CCRTFILE) PARM('*CURLIB' 'PODELTH' '14' +
+                          '1000' '1000' '30' &S)
+/*********************************************************************/
+/*** RUN TPOHDELT TO DO THE DELETE.  THE ONLY PARAMETER IS THE     ***/
+/*** MAXIMUM NUMBER OF PURCHASE ORDERS TO DELETE DURING A SINGLE   ***/
+/*** RUN.  IT IS A 5 DIGIT NUMBER.                                 ***/
+/*********************************************************************/
+             CALL       PGM(TPOHDELT) PARM('05000')
+/*********************************************************************/
+/*** CALL FCTPOHDELT TO CLOSE ALL THE FILES OPENED BY FOT7PODELT   ***/
+/*********************************************************************/
+             CALL       FCTPOHDELT
+
+
+/* Rename POHIST01 to the new sequence number. */
+             CHKOBJ     OBJ(MCPRD1/&FILENAME) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF9801) EXEC(GOTO CMDLBL(RENAME))
+
+/* If the new sequence number already exists, increment the sequence */
+/* and try to rename again.  If the sequence number is equal to 99,  */
+/* remind operator to copy old files to tape and STOP job.           */
+LOOP:        CHGVAR     VAR(&NEWSEQ) VALUE(&SEQ)
+             CHGVAR     VAR(&NEWSEQ) VALUE(&NEWSEQ+1)
+             CHGVAR     VAR(&SEQ) VALUE(&NEWSEQ)
+             CHGVAR     VAR(&FILENAME) VALUE(&POH *CAT &NEWMONTH +
+                          *CAT &CURYEAR *CAT &SEQ)
+             CHKOBJ     OBJ(MCPRD1/&FILENAME) OBJTYPE(*FILE)
+             MONMSG     MSGID(CPF9801) EXEC(GOTO CMDLBL(RENAME))
+             GOTO       CMDLBL(LOOP)
+
+RENAME:      CHGDTAARA  DTAARA(MCPRD1/POHDELT) VALUE(&FILENAME)
+             RNMOBJ     OBJ(MCPRD1/POHIST01) OBJTYPE(*FILE) +
+                          NEWOBJ(&FILENAME)
+             SNDMSG     MSG('From BPOHDELT2: ' *CAT &FILENAME *CAT +
+                          ' created. Copy to tape and then purge +
+                          from MCPRD1. ***') TOUSR(QSYSOPR)
+
+             IF         COND(&SEQ = '99') THEN(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Sequence number is +
+                          equal to 99.  Please copy the old +
+                          MCPRD1/POH* files to tape and then purge +
+                          them.  This job cannot be run again this +
+                          month. ***') TOUSR(QSYSOPR)
+             ENDDO
+
+REORG:       SNDMSG     MSG('From BPOHDELT2:  *** Beginning +
+                          reorganization of history files. ***') +
+                          TOUSR(QSYSOPR)
+             RGZPFM     FILE(MCPRD1/MCFPST0200)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0200 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ2)
+             ENDDO
+RGZ2:        RGZPFM     FILE(MCPRD1/MCFPST0300)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0300 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ3)
+             ENDDO
+RGZ3:        RGZPFM     FILE(MCPRD1/MCFPST0400)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0400 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ4)
+             ENDDO
+RGZ4:        RGZPFM     FILE(MCPRD1/MCFPST0500)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0500 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ5)
+             ENDDO
+RGZ5:        RGZPFM     FILE(MCPRD1/MCFPST0600)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0600 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ6)
+             ENDDO
+RGZ6:        RGZPFM     FILE(MCPRD1/MCFPST0700)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0700 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ7)
+             ENDDO
+RGZ7:        RGZPFM     FILE(MCPRD1/MCFPST0800)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0800 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ8)
+             ENDDO
+RGZ8:        RGZPFM     FILE(MCPRD1/MCFPST0900)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST0900 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ9)
+             ENDDO
+RGZ9:        RGZPFM     FILE(MCPRD1/MCFPST1000)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST1000 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(RGZ10)
+             ENDDO
+RGZ10:       RGZPFM     FILE(MCPRD1/MCFPST5400)
+             MONMSG     MSGID(CPF2981) EXEC(DO)
+             SNDMSG     MSG('From BPOHDELT2:  *** Reorganization of +
+                          MCPRD1/MCFPST5400 not successful.  +
+                          Reorganize at a later time. ***') +
+                          TOUSR(QSYSOPR)
+             GOTO       CMDLBL(EOJ)
+             ENDDO
+
+             SNDMSG     MSG('*** Job BPOHDELT2 successfully +
+                          completed. ***') TOUSR(QSYSOPR)
+
+EOJ:   ENDPGM

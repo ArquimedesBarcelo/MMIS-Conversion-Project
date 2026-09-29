@@ -1,0 +1,9 @@
+             PGM /*R3INVVALCL*/
+             /* RUN THE QUERY PROGRAM NECESSARY TO CREATE FILES             */
+             /*  - R3INVVAL - CSIS/MMIS INVENTORY VALUATION                 */
+             /*                                                             */
+             /*  THIS FILE WILL BE COMPARED WITH DATA FROM PRAPS TO FIND    */
+             /*  DISCREPANCIES BETWEEN THE TWO APPLICATIONS.                */
+             /*                                                             */
+             RUNQRY     QRY(R3INVVAL)
+             ENDPGM

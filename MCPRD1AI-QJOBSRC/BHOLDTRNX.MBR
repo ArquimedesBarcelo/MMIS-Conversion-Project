@@ -1,0 +1,93 @@
+//BCHJOB  JOB(BHOLDTRNX) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *MSG) LOGCLPGM(*YES)
+/*#################################################################*/
+/*##            C S A S   JOB 'BHOLDTRN'                         ##*/
+/*## THIS JOB PROCESSES THE STORES CUTOFF TRANSACTIONS THAT WERE ##*/
+/*## PLACED IN HOLD BECAUSE THE TC DATE WAS AFTER THE MONTH-END  ##*/
+/*## CUTOFF DATE.  THIS JOB IS STARTED FROM THE FINAL CLOSE JOB  ##*/
+/*## 'BXFINCLS' AND IS THE LAST STEP OF THE FINAL CLOSE FOR CSAS ##*/
+/*## PLANTS WHICH DON'T RUN FREIGHT ACCOUNTING.  FOR CSAS PLANTS ##*/
+/*## WHICH RUN THE FREIGHT ACCOUNTING SYSTEM, THIS JOB STARTS    ##*/
+/*## JOB BFRTPROC2 WHICH PROCESSES HELD FREIGHT TRANSACTIONS.    ##*/
+/*##                                                             ##*/
+/*## 15JUL1993 THIS JOB WAS MODIFIED FOR PLANTS WHICH UTILIZE    ##*/
+/*##           THE CSAS FREIGHT ACCOUNTING SYSTEM TO:            ##*/
+/*##            1) RUN AN INITIAL FRT STATUS REPORT FOR THE      ##*/
+/*##               NEW ACCOUNTING MONTH PRIOR TO THE PROCESSING  ##*/
+/*##               OF ANY HELD FREIGHT DATA FROM TIS.            ##*/
+/*##            2) START THE JOB BFRTPROC2 WHICH WILL PROCESS    ##*/
+/*##               THE TIS FREIGHT DATA WHICH HAS BEEN WRITTEN   ##*/
+/*##               TO A HOLD FILE DURING THE CLOSING PERIOD.     ##*/
+/*##                                                             ##*/
+/*#################################################################*/
+CSASOVR:
+             OVRDBF     FILE(MCFLCA0101) SHARE(*YES)  /*MACCOUNT-INFO*/
+             OVRDBF     FILE(MCFLCA0601) SHARE(*YES)  /*MMATL-ACCUM*/
+             OVRDBF     FILE(MCFLCA0701) SHARE(*YES)  /*DTRANS MC*/
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)  /*MSTORERM*/
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)  /*DDESC*/
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)  /*DDESC2*/
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)  /*DMANPART*/
+CSASOPN:
+             OPNDBF     FILE(MCFLCA0101) OPTION(*ALL) /*MACCOUNT-INFO*/
+             OPNDBF     FILE(MCFLCA0601) OPTION(*ALL) /*MMATL-ACCUM*/
+             OPNDBF     FILE(MCFLCA0701) OPTION(*ALL) /*DTRANS MC*/
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL) /*MSTORERM*/
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL) /*DDESC*/
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL) /*DDESC2*/
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL) /*DMANPART*/
+CMDCALL:
+/*#################################################################*/
+             CALL       MCDLT    PARM('DHLDTRN4')
+             CALL       MCXRENAM PARM('DHLDTRN3' 'DHLDTRN4')
+             CALL       MCXRENAM PARM('DHLDTRN2' 'DHLDTRN3')
+             CALL       MCXRENAM PARM('DHLDTRN1' 'DHLDTRN2')
+/*###########DLTF       FILE(*CURLIB/DHLDTRN4)                       */
+/*###########RNMOBJ     OBJ(DHLDTRN3) OBJTYPE(*FILE) NEWOBJ(DHLDTRN4)*/
+/*###########RNMOBJ     OBJ(DHLDTRN2) OBJTYPE(*FILE) NEWOBJ(DHLDTRN3)*/
+/*###########RNMOBJ     OBJ(DHLDTRN1) OBJTYPE(*FILE) NEWOBJ(DHLDTRN2)*/
+             CALL       PGM(MCXCRTFIL) PARM('*CURLIB' 'DHLDTRN1' +
+                          '080' '1000' '1000' '30')
+             OVRDBF     FILE(DHLDTRN)  TOFILE(*LIBL/DHLDTRN1)
+             CALL       PGM(THOLDTRN)
+             OVRDBF     FILE(ABSTFILE) TOFILE(*LIBL/DHLDTRN1)
+             OVRPRTF    FILE(MCPRT)    TOFILE(*LIBL/MCPRT94)
+             CALL       PGM(TDLYCHGS)
+             OVRPRTF    FILE(MCPRT)    TOFILE(*LIBL/MCPRT94)
+             OVRPRTF    FILE(MCPRTA)   TOFILE(*LIBL/MCPRT94)
+             CALL       PGM(TDLYTRNS)
+             CALL       PGM(TCHKABRT)
+             CALL       PGM(TUNITCHK)
+             CALL       PGM(TCALCAVG)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* P L E A S E   N O T E                                           */
+/* THE FOLLOWING STEPS SHOULD ONLY BE EXECUTED IN PLANTS WHICH USE */
+/* THE CSAS FREIGHT ACCOUNTING SYSTEM, OTHERWISE THE FOLLOWING     */
+/* SECTION SHOULD BE COMMENTED OUT (CALL TFRTSTAT, AND STRDBRDR    */
+/* OF BFRTPROC2).                                                  */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*                                                                 */
+/* RUN THE FIRST FREIGHT STATUS REPORT OF THE NEW MONTH PRIOR TO   */
+/* PROCESSING ANY HELD OR NEW FREIGHT DATA.                        */
+/***         OVRPRTF    FILE(MCPRT) TOFILE(*LIBL/MCPRT94) SAVE(*YES) ***/
+/***         CALL       PGM(TFRTSTAT)                                ***/
+/*                                                                 */
+/* START THE JOB BFRTPROC2 WHICH WILL PROCESS THE HELD FREIGHT DATA*/
+/***         STRDBRDR   FILE(*LIBL/QJOBSRC) MBR(BFRTPROC2) +         ***/
+/***            JOBQ(*LIBL/HBATCH) RDR(BFRTPROC2)                    ***/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*#################################################################*/
+CSASCLS:
+             CLOF       OPNID(MCFLCA0101)             /*MACCOUNT-INFO*/
+             CLOF       OPNID(MCFLCA0601)             /*MMATL-ACCUM*/
+             CLOF       OPNID(MCFLCA0701)             /*DTRANS MC*/
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)             /*MSTORERM*/
+             CLOF       OPNID(MCFLCS1401)             /*DDESC*/
+             CLOF       OPNID(MCFLCS3101)             /*DDESC2*/
+             CLOF       OPNID(MCFLCS3603)             /*DMANPART*/
+//ENDBCHJOB

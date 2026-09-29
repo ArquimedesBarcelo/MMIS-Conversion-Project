@@ -1,0 +1,21 @@
+//BCHJOB  JOB(BAPMANSD) JOBD(*LIBL/MCMGR) JOBQ(*JOBD) LOG(*JOBD +
+             *JOBD *JOBD) LOGCLPGM(*YES)
+/*********************************************************************/
+/***  AP4 SEND MANIFEST FILE TO AKRON ACCOUNTS PAYABLE.            ***/
+/*********************************************************************/
+SBMRJEJOB  FILE(MCPRD/QRJEJCL) MBR(RJAPJCL) SSND(QRJE/RJESSN) +
+             CMD(*YES)
+/*********************************************************************/
+/***  CALL 'CLMANSENT' TO MARK THE FILE AS BEING SENT TO AKRON     ***/
+/***  SO THEY CAN DO ANOTHER 'AP3'.                                ***/
+/*********************************************************************/
+           CALL       PGM(CLMANSENT)
+/*********************************************************************/
+/***  SEND MESSAGE TO ACCOUNTS PAYABLE INDICATING THAT 'AP4'       ***/
+/***  WAS SENT TO AKRON ACCOUNTS PAYABLE                           ***/
+/*********************************************************************/
+SNDMSG     MSG('AP4 completed - The manifest file has been sent to +
+             Akron accounts payable via rje.') TOUSR(t881s26)
+SNDMSG     MSG('AP4 completed - The manifest file has been sent to +
+             Akron accounts payable via rje.') TOUSR(T001575)
+//ENDBCHJOB

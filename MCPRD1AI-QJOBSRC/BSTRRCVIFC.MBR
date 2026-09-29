@@ -1,0 +1,45 @@
+             PGM        PARM(&RCVSLIP &ITEMNO &CORPCDE &QTY &UM +
+                             &DATE &TIME &CORRECT)
+
+/***********************************************************************/
+/** BSTRRCVIFC - STOREROOM RECEIPT EXTERNAL INTERFACE                 **/
+/**                                                                   **/
+/** THIS PROGRAM IS CALLED WHEN A CSIS STOREROOM RECEIPT IS DONE      **/
+/** EITHER MANUALLY OR AUTOMATICALLY AND THE PLANT STOREROOM SWITCH   **/
+/** IS SET TO INDICATE THAT CSIS STORES RECEIPTS INTERFACE WITN AN    **/
+/** EXTERNAL CSIS SYSTEM (APPLICATION).  THIS SWITCH CAN BE FOUND     **/
+/** IN THE INIT TRANSACTION (PLANT SETUP) UNDER CSIS STOREROOM USER   **/
+/** OPTIONS (MPLTINFO-KEY = SRX).                                     **/
+/**                                                                   **/
+/** THIS PROGRAM SHOULD BE PLACED IN QJOBSRC, SO THAT THE PLANT MAY   **/
+/** CHANGE THE EXTERNAL CSIS PROGRAM THAT IS CALLED ON THEIR SYSTEM.  **/
+/** THIS WILL ALLOW DIFFERENT LOCATIONS TO HAVE DIFFERENT EXTERNAL    **/
+/** INTERFACES IF NECESSARY.                                          **/
+/**                                                                   **/
+/** IF THIS LOCATION DOES NOT USE A STOREROOM EXTERNAL INTERFACE,     **/
+/** COMMENT OUT THE CALL TO THE PROGRAM AND RECOMPILE.  OTHERWISE     **/
+/** CODE THE CALL TO THE CORRECT PROGRAM PASSING THE NECESSARY        **/
+/** PARAMETERS AND RECOMPILE.                                         **/
+/***********************************************************************/
+
+             DCL VAR(&RCVSLIP) TYPE(*CHAR) LEN(13)  /* RECEIVING SLIP  */
+             DCL VAR(&ITEMNO)  TYPE(*CHAR) LEN(4)   /* ITEM NUMBER     */
+             DCL VAR(&CORPCDE) TYPE(*CHAR) LEN(7)   /* CSIS CORP CODE  */
+             DCL VAR(&QTY)     TYPE(*DEC)  LEN(8 0) /* QUANTITY +/-    */
+             DCL VAR(&UM)      TYPE(*CHAR) LEN(2)   /* UNIT OF MEASURE */
+             DCL VAR(&DATE)    TYPE(*CHAR) LEN(6)   /* DATE (YYMMDD)   */
+             DCL VAR(&TIME)    TYPE(*CHAR) LEN(6)   /* DATE (HHMMSS)   */
+             DCL VAR(&CORRECT) TYPE(*CHAR) LEN(1)   /* CORRECT (X,' ') */
+
+
+/** COMMENT OUT PROGRAM CALL IF NOT USING EXTERNAL SYSTEM **/
+
+        /*   ADDLIBLE EXTERNLIB   */
+        /*   CALL PGM(EXTERNLIB/EXTERNPGM) PARM(&RCVSLIP &ITEMNO +
+                                                &CORPCODE &QTY +
+                                                &UM &DATE &TIME +
+                                                &CORRECT) */
+        /*   RMVLIBLE EXTERNLIB   */
+
+FINI:
+             ENDPGM

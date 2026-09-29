@@ -1,0 +1,77 @@
+   PGM
+             DCL        VAR(&S) TYPE(*CHAR) LEN(2)
+             DCL        VAR(&SYSTEM) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&PRINTTEXT) TYPE(*CHAR) LEN(36)
+   /**************************************************************/
+   /*** MNFSTATS                                               ***/
+   /***    - THIS JOB WILL PERFORM ALL NECESSARY STEPS TO      ***/
+   /***      GENERATE THE MANUFACTURER/PART NUMBER STATISTICS  ***/
+   /***      REPORT.                                           ***/
+   /***                                                        ***/
+   /*** THIS PROGRAM WILL PERFORM THE FOLLOWING:               ***/
+   /***    1) DELETE MNFCHGDATE, MNFCMPDATE, & MNFINDATE, IF   ***/
+   /***         THEY EXIST.                                    ***/
+   /***    2) EXECUTES QUERIES MNFCHGDATE, MNFCMPDATE, &       ***/
+   /***         MNFINDATE WHICH GENERATE THE FILES LISTED      ***/
+   /***         ABOVE.                                         ***/
+   /***    3) EXECUTES QUERY MNFSTATRPT WHICH GENERATES        ***/
+   /***         THE STATISTICS REPORT.                         ***/
+   /***    4) ESTABLISH THE PROPER PRINT OVERRIDE FOR QUERY    ***/
+   /***         REPORT.                                        ***/
+   /***    5) EXECUTE GRTOBJAUT TO GRANT '*PUBLIC' '*ALL'      ***/
+   /***         AUTHORITY FOR COUNT FILES.                     ***/
+   /**************************************************************/
+
+   /* CHANGE THE JOB TO INSURE THAT A JOBLOG IS PRODUCED FOR NOW.    */
+             CHGJOB     LOG(4 0 *SECLVL) LOGCLPGM(*YES)
+
+   /* ESTABLISH THE CURLIB.  FILES WILL BE CREATED IN THIS LIBRARY.  */
+             CHGCURLIB  CURLIB(MCPRD1)
+
+   /* DELETE COUNT FILES */
+             CALL       PGM(MCDLT) PARM('MNFCHGDATE')
+             CALL       PGM(MCDLT) PARM('MNFCMPDATE')
+             CALL       PGM(MCDLT) PARM('MNFINDATE')
+
+   /* RUN QUERIES TO CREATE COUNT FILES */
+             RUNQRY     QRY(MCPRD/MNFCHGDATE)
+             RUNQRY     QRY(MCPRD/MNFCMPDATE)
+             RUNQRY     QRY(MCPRD/MNFINDATE)
+
+   /* GRANT *PUBLIC *ALL AUTHORITY TO THE COUNT FILES JUST CREATED  */
+   /* SO THAT THEY CAN BE DELETED THE NEXT TIME THAT THIS PGM IS RUN. */
+             GRTOBJAUT  OBJ(MNFCHGDATE) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MNFCMPDATE) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+             GRTOBJAUT  OBJ(MNFINDATE) OBJTYPE(*FILE) USER(*PUBLIC) +
+                          AUT(*ALL)
+
+   /* ESTABLISH THE PROPER OVERRIDES TO DIRECT THE QUERY REPORTS AS  */
+   /* DESIRED.                                                       */
+   /*  CHANGE THE JOB TO PRINT THE SYSTEM NAME ON THE REPORT         */
+             RTVNETA    SYSNAME(&SYSTEM)
+             CHGVAR     VAR(&PRINTTEXT) VALUE('Stat Rpt: ' *CAT +
+                          &SYSTEM)
+             CHGJOB     PRTTXT(&PRINTTEXT)
+
+   /* OVERRIDE THE PRINT FILE TO THE CORRECT PAPER SIZE AND OUTQ     */
+   /*   LENGTH X WIDTH                                               */
+   /*       11 X 14 PAPER  - PAGESIZE(66 132) LPI(6) CPI(10)         */
+   /*      8.5 X 14 PAPER  - PAGESIZE(68 132) LPI(8) CPI(10)         */
+   /*       11 X 8.5 PAPER - PAGESIZE(66 132) LPI(6) CPI(16.7)       */
+             OVRPRTF    FILE(QPQUPRFIL) PAGESIZE(66 132) LPI(6) +
+                          CPI(12) OVRFLW(60) OUTQ(*LIBL/PD01) +
+                          USRDTA(STATRPT)
+             MONMSG     MSGID(CPF0000)
+
+   /* RUN THE QUERY REPORT PROGRAM.                                */
+             RUNQRY     QRY(MCPRD/MNFSTATRPT)     /* STATISTICS REPORT */
+
+   /*  SEND THE GENERATED SPOOL FILE TO AKRON60                    */
+
+            SNDNETSPLF FILE(QPQUPRFIL) TOUSRID((PRINTIT AKRON60)) +
+                         SPLNBR(*LAST) DTAFMT(*ALLDATA)
+            MONMSG     MSGID(CPF0000)
+
+             ENDPGM

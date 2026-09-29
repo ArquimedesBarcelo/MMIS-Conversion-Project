@@ -1,0 +1,31 @@
+             PGM        /*BBYRPOVL*/
+             DCL        VAR(&ROUTE)    TYPE(*CHAR) LEN(80)
+             DCL        VAR(&DATALINE) TYPE(*CHAR) LEN(112)
+CSISOVR:
+             OVRDBF     FILE(MCFLCS0201) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS1401) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS3101) SHARE(*YES)
+             OVRDBF     FILE(MCFLCS3603) SHARE(*YES)
+CSISOPN:
+             OPNDBF     FILE(MCFLCS0201) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS1401) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS3101) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+             OPNDBF     FILE(MCFLCS3603) OPTION(*ALL)
+             MONMSG     MSGID(CPF0000)
+CMDCALL:
+             CHGVAR     VAR(&ROUTE) VALUE('A. BENJAMIN    +
+                          1210073MCMGR   MCMGR   MCPRD   51    01    -
+                      ')
+             CHGVAR VAR(&DATALINE)  VALUE('               +
+                                                                     -
+                      ')
+             CALL       TBYRPOVL PARM(&ROUTE &DATALINE)
+CSISCLS:
+             CLOF       OPNID(MCFLCS0201)
+             CLOF       OPNID(MCFLCS1401)
+             CLOF       OPNID(MCFLCS3101)
+             CLOF       OPNID(MCFLCS3603)
+ENDPGM
